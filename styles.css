@@ -1,0 +1,23 @@
+body {
+    font-family: sans-serif;
+    margin: 0;
+    overflow: hidden;
+  }
+  
+  #container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+  }
+
+  .title{
+    position: absolute;
+    text-align: center;
+    color:hsl(48, 89%, 60%);
+    width: 100%;
+    z-index: 2;
+    font-size: 1.5rem; 
+  }
