@@ -10,6 +10,7 @@ import {
     AxesHelper,
     GridHelper,
     BoxBufferGeometry,
+    Clock,
     HemisphereLight,
     DirectionalLight,
     DirectionalLightHelper,
@@ -21,6 +22,7 @@ import OrbitControls from "three-orbitcontrols";
 import Stats from 'stats.js';
 import hasWebgl from 'has-webgl';
 import { config } from './config';
+import { KeyboardState } from './keywords';
 
 var geometry, material, mesh;
 
@@ -32,8 +34,11 @@ class Editor {
         this.scene = null;
         this.renderer = null;
         this.controls = null;
+        this.clock = new Clock();
         this.container = document.querySelector("#container");
         this.stats = new Stats()
+        this.keyboard = new KeyboardState(this.container);
+
         document.body.appendChild(this.stats.dom)
         this.init();
     }
@@ -71,8 +76,10 @@ class Editor {
         this.scene.add(this.gridHelper);
 
         geometry = new BoxBufferGeometry(0.2, 0.2, 0.2);
-        material = new MeshBasicMaterial({ color: "hsl(48, 89%, 60%)" /* , wireframe: true  */});
+        material = new MeshBasicMaterial({ color: "hsl(48, 89%, 60%)" /* , wireframe: true  */ });
         mesh = new Mesh(geometry, material);
+        let axesHelper = new AxesHelper( 1 );
+        mesh.add(axesHelper);
         this.scene.add(mesh);
     }
 
@@ -111,10 +118,31 @@ class Editor {
     }
 
     update () {
+
+        this.keyboard.update();
+
+        var delta = this.clock.getDelta();
+        var moveDistance = 1 * delta; 			// 1 units per second
+        var rotateAngle = Math.PI / 4 * delta;	// pi/4 radians (45 degrees) per second
         this.stats.begin()
-        let timer = 0.001 * Date.now();
-        mesh.position.y = 0.5 + 0.5 * Math.sin(timer);
-        mesh.rotation.y += 0.01;
+        let timer = 0.004 * Date.now();
+        
+
+        // move forwards/backwards
+        if (this.keyboard.pressed("W"))
+            mesh.translateZ(-moveDistance);
+        if (this.keyboard.pressed("S"))
+            mesh.translateZ(moveDistance);
+        // move left/right (strafe)
+        if (this.keyboard.pressed("A"))
+            mesh.translateX(-moveDistance);
+        if (this.keyboard.pressed("D"))
+            mesh.translateX(moveDistance);
+
+
+        // this.keys.debug();
+        mesh.position.y = 0.5+ 0.5 * Math.sin(timer);
+        // mesh.rotation.y += 0.01;
     }
 
     loop () {
