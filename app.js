@@ -7,31 +7,27 @@ import {
     Mesh,
     MeshBasicMaterial,
     Color,
-    CubeGeometry,
+    PlaneGeometry, CubeGeometry,CylinderGeometry,ConeGeometry, BoxBufferGeometry,CircleGeometry, SphereGeometry,
     AxesHelper,
     RepeatWrapping,
     GridHelper,
     PointLight,
-    BoxBufferGeometry,
     ImageUtils,
     Clock,
     Raycaster,
     TextureLoader,
-    PlaneGeometry,
     HemisphereLight,
     DirectionalLight,
     DirectionalLightHelper,
     HemisphereLightHelper,
     FileLoader,
-    ShaderMaterial, Vector3, Object3D, Math as Mate, BackSide
+    ShaderMaterial, Vector3, Object3D, Math as Mate, BackSide, 
 } from 'three';
 // import OrbitControls from "three-orbitcontrols";
 import Stats from 'stats.js';
 import hasWebgl from 'has-webgl';
 import { config } from './config';
 import { KeyboardState } from './keywords';
-
-// var geometry, material, mesh;
 
 
 class Editor {
@@ -44,36 +40,22 @@ class Editor {
         this.clock = new Clock();
         this.container = document.querySelector("#container");
         this.stats = new Stats();
-        // this.stats.domElement.style.position = 'absolute';
-        // this.stats.domElement.style.bottom = '0px';
-        // this.stats.domElement.style.zIndex = 100;
         this.keyboard = new KeyboardState(this.container);
-
         document.body.appendChild(this.stats.domElement)
+
         this.init();
     }
 
     init() {
+        this.initScene();       // SCENE
+        this.initRenderer();    // RENDERER
+        this.loop();            // GAME LOOP
 
-        // this.initCamera();
-
-        // SCENE
-        this.initScene();
-
-        // RENDERER
-        this.initRenderer();
-
-
-        // CONTROLS
-        // this.controls = new OrbitControls(this.camera, this.renderer.domElement);
-
-        // remember these initial values on RESIZE
-        this.tanFOV = Math.tan(((Math.PI / 180) * this.camera.fov / 2));
+        // EVENTS
         window.addEventListener('resize', this.onWindowResize.bind(this), false);
-
-        // start loop
-        this.loop();
-
+        // when the mouse moves, call the given function
+        document.addEventListener('mousemove', this.mouseMove.bind(this), false);
+        document.addEventListener('mousedown', this.mouseClick.bind(this), false);
     }
 
     initRenderer() {
@@ -115,18 +97,7 @@ class Editor {
         axis.position.y = 0.01;
         this.scene.add(axis);
 
-        var loader = new TextureLoader();
-        // var texture = loader.load(require('./images/square-thick.png'), function (texture) {
-        //     texture.wrapS = texture.wrapT = RepeatWrapping;
-        //     texture.offset.set(0, 0);
-        //     texture.repeat.set(32, 32);
-        //     // your code
-        // });
-
-        // var squareT = new TextureLoader(require('./images/square.png'));
-        // squareT.wrapS = squareT.wrapT = RepeatWrapping;
-        // squareT.offset.set(0, 0);
-        // squareT.repeat.set(32, 32);
+        // PIANO (su cui verranno incollate le entità)
         this.planeGeo = new PlaneGeometry(32, 32);
         this.planeMat = new MeshBasicMaterial({ /* map: texture,  */color: 0xbbbbbb });
         this.basePlane = new Mesh(this.planeGeo, this.planeMat);
@@ -142,13 +113,12 @@ class Editor {
         gridHelper.position.set(16, 0.01, 16);
         this.scene.add(gridHelper);
 
-
-        this.cubeGeo = new CubeGeometry(1, 1, 1);
-
-        // var squareTexture = new TextureLoader(require('./images/square.png'));
-        // var squareTextureX = new TextureLoader(require('./images/square-X.png'));
-        // var squareTextureO = new TextureLoader(require('./images/square-O.png'));
-        // var squareTexturePlus = new TextureLoader(require('./images/square-plus.png'));
+        // SHAPES
+        this.cubeGeo     = new CubeGeometry(1, 1, 1);
+        this.sphereGeo   = new SphereGeometry(0.25,12,12);
+        this.cilinderGeo = new CylinderGeometry(0.35, 0.35,1,12);
+        this.boxGeo      = new CubeGeometry(0.35, 0.35,0.65);
+        this.coneGeo     = new ConeGeometry(0.5, 1,12);
 
         this.offset = [
             new Vector3(1, 0, 0), new Vector3(-1, 0, 0),
@@ -165,32 +135,26 @@ class Editor {
             new Color(0x8800ff),
             new Color(0x804000),
             new Color(0x222222),
-            new Color(0xFF66FF)];
+            new Color(0xFF66FF)
+        ];
 
         this.materials = { "solid": [], "add": [], "delete": [], "color": [] };
         for (var i = 0; i < this.colors.length; i++) {
-            this.materials["solid"][i] = new MeshBasicMaterial({ /* map: squareTexture, */ color: this.colors[i] });
-            this.materials["add"][i] = new MeshBasicMaterial({/*  map: squareTexturePlus, */ color: this.colors[i], transparent: true, opacity: 0.75 });
-            this.materials["delete"][i] = new MeshBasicMaterial({ /* map: squareTextureX, */ color: this.colors[i], transparent: true, opacity: 0.75 });
-            this.materials["color"][i] = new MeshBasicMaterial({/*  map: squareTextureO, */ color: this.colors[i], transparent: true, opacity: 0.75 });
+            this.materials["solid"][i] = new MeshBasicMaterial({ color: this.colors[i]});
+            this.materials["add"][i] = new MeshBasicMaterial({ color: this.colors[i], transparent: true, opacity: 0.5 });
+            this.materials["delete"][i] = new MeshBasicMaterial({ color: this.colors[i], transparent: true, opacity: 0.5 });
+            this.materials["color"][i] = new MeshBasicMaterial({ color: this.colors[i], transparent: true, opacity: 0.5 });
         }
 
+        // il brush di default
         this.brush = new Mesh(this.cubeGeo.clone(), this.materials["add"][1]);
         this.brush.ignore = true;    // ignored by raycaster
         this.brush.visible = false;
         this.brush.mode = "add";
         this.brush.colorIndex = 1;
-
         this.scene.add(this.brush);
-
-        this.cubeNames = [];
-
-        this.mouse2D = new Vector3(0, 0, 0.5);
-
-        // when the mouse moves, call the given function
-        document.addEventListener('mousemove', this.mouseMove.bind(this), false);
-        document.addEventListener('mousedown', this.mouseClick.bind(this), false);
-
+        this.cubeNames = [];    // array che conterrà tutti gli elementi aggiunti alla mappa
+        this.mouse2D = new Vector3(0, 0, 0.5); // coordinate del mouse 
     }
 
     viewSet(n) {
@@ -203,13 +167,13 @@ class Editor {
         // birds-eye view
         if (n == 2) {
             this.person.position.set(16, 42, 16);
-            this.person.rotation.set(0, -Math.PI / 2.0, 0);
+            this.person.rotation.set(0, (-Math.PI / 2.0), 0);
             this.camera.rotation.set(-1.48, 0, 0);
         }
     }
 
+    // update the mouse variable
     mouseMove(event) {
-        // update the mouse variable
         this.mouse2D.x = (event.clientX / window.innerWidth) * 2 - 1;
         this.mouse2D.y = - (event.clientY / window.innerHeight) * 2 + 1;
     }
@@ -218,48 +182,57 @@ class Editor {
         this.brushAction();
     }
 
+    getShape(index){
+        let shape;
+        switch (index) {
+            case 1: shape = new Mesh(this.cubeGeo.clone()); break;
+            case 2: shape = new Mesh(this.sphereGeo.clone()); break;
+            case 3: shape = new Mesh(this.sphereGeo.clone()); break;
+            case 4: shape = new Mesh(this.sphereGeo.clone()); break;
+            case 5: shape = new Mesh(this.sphereGeo.clone()); break;
+            case 5: shape = new Mesh(this.cilinderGeo.clone()); break;
+            case 6: shape = new Mesh(this.cilinderGeo.clone()); break;
+            case 7: shape = new Mesh(this.boxGeo.clone()); break;
+            case 8: shape = new Mesh(this.coneGeo.clone()); break;
+            default: shape = new Mesh(this.cubeGeo.clone()); break;
+        }
+        return shape;
+    }
+
     brushAction() {
         if (this.brush.mode == "add") {
-            var cube = new Mesh(this.cubeGeo);
-            cube.material = this.materials["solid"][this.brush.colorIndex];
-            cube.position.copy(this.brush.position.clone());
-            cube.name = this.brush.addName;
-            cube.colorIndex = this.brush.colorIndex;
-            this.scene.add(cube);
-            this.cubeNames.push(cube.name);
+            var shape = this.getShape(this.brush.colorIndex);
+            shape.material = this.materials["solid"][this.brush.colorIndex];
+            shape.position.copy(this.brush.position.clone());
+            shape.name = this.brush.addName;
+            shape.colorIndex = this.brush.colorIndex;
+            console.log(shape.position, this.brush)
+            this.scene.add(shape);
+            this.cubeNames.push(shape.name);
         }
 
         if (this.brush.mode == "delete") {
-            var cube = this.scene.getObjectByName(this.brush.targetName);
-            this.scene.remove(cube);
+            var shape = this.scene.getObjectByName(this.brush.targetName);
+            this.scene.remove(shape);
             var index = this.cubeNames.indexOf(this.brush.targetName);
             if (index != -1) this.cubeNames.splice(index, 1);
         }
 
         if (this.brush.mode == "color") {
-            var cube = this.scene.getObjectByName(this.brush.targetName);
-            if (cube) {
-                cube.material = this.materials["solid"][this.brush.colorIndex];
-                cube.colorIndex = this.brush.colorIndex;
+            var shape = this.scene.getObjectByName(this.brush.targetName);
+            if (shape) {
+                shape.material = this.materials["solid"][this.brush.colorIndex];
+                shape.colorIndex = this.brush.colorIndex;
             }
         }
+        console.log(this.cubeNames)
     }
-
-    // initCamera() {
-    //     this.camera = new PerspectiveCamera(config.FOV, window.innerWidth / window.innerHeight, config.NEAR, config.FAR);
-    //     // this.camera.position.z = 1.5;
-    //     // this.camera.position.x = 1;
-    //     this.camera.position.set(2, 1, 5);
-    // }
 
     onWindowResize(event) {
         this.camera.aspect = this.container.clientWidth / this.container.clientHeight;
-        // adjust the FOV
-        this.camera.fov = (360 / Math.PI) * Math.atan(this.tanFOV * (this.container.clientHeight / this.container.clientWidth));
-        this.camera.updateProjectionMatrix();
-        this.camera.lookAt(this.scene.position);
         this.renderer.setSize(this.container.clientWidth, this.container.clientHeight);
         this.renderer.render(this.scene, this.camera);
+        this.camera.updateProjectionMatrix();
     }
 
     update() {
@@ -314,9 +287,16 @@ class Editor {
         // voxel painting controls
 
         // when digit is pressed, change brush color data
-        for (var i = 0; i < 10; i++)
-            if (this.keyboard.down(i.toString()))
+        for (var i = 0; i < 10; i++){
+            if (this.keyboard.down(i.toString())){
                 this.brush.colorIndex = i;
+                console.log(this.brush);
+                // this.brush =  new Mesh(this.getShape(this.brush.colorIndex));
+                // this.brush.ignore = true;    // ignored by raycaster
+                // this.brush.visible = false;
+                // this.brush.mode = "add";
+            }
+        }
 
         this.brush.material = this.materials["add"][this.brush.colorIndex];
 
@@ -335,7 +315,6 @@ class Editor {
         if (this.keyboard.down("B") && this.cubeNames.length > 0)
             this.scene.remove(this.scene.getObjectByName(this.cubeNames.pop()));
 
-        ///////////////////////////////////////////////////////////////////////////
         var raycaster = new Raycaster()
         raycaster.setFromCamera(this.mouse2D.clone(), this.camera);
         var intersectionList = [];
@@ -358,22 +337,14 @@ class Editor {
         if (result) {
             // place cube on basePlane
             if ((this.brush.mode == "add") && result.object.base) {
+                // this.brush = new Mesh(this.getShape(this.brush.colorIndex), this.materials["add"][this.brush.colorIndex]);
                 this.brush.visible = true;
                 var intPosition = new Vector3(Math.floor(result.point.x), 0, Math.floor(result.point.z));
                 let a = intPosition.clone().add(new Vector3(0.5, 0.5, 0.5));
                 this.brush.position.copy(a);
                 this.brush.addName = "X" + intPosition.x + "Y" + intPosition.y + "Z" + intPosition.z;
+                this.brush.coord = { x: intPosition.x, y: intPosition.y, z: intPosition.z };
             }
-
-            // place cube on another cube
-            /* if ((brush.mode == "add") && !result.object.base) {
-                this.brush.visible = true;
-                var faceIndex = Math.floor(result.faceIndex / 2);
-                this.brush.position = result.object.position.clone().add(offset[faceIndex]);
-                this.brush.addName = "X" + Math.floor(this.brush.position.x) + "Y" + Math.floor(this.brush.position.y)
-                    + "Z" + Math.floor(this.brush.position.z);
-            } */
-
             // delete cube
             if ((this.brush.mode == "delete") && !result.object.base) {
                 this.brush.visible = false;
@@ -381,7 +352,9 @@ class Editor {
                     Math.floor(result.object.position.y), Math.floor(result.object.position.z));
                 this.brush.targetName = "X" + intPosition.x + "Y" + intPosition.y + "Z" + intPosition.z;
                 var targetCube = this.scene.getObjectByName(this.brush.targetName);
-                targetCube.material = this.materials["delete"][targetCube.colorIndex];
+                if(targetCube){
+                    targetCube.material = this.materials["delete"][targetCube.colorIndex];
+                }
             }
             //  // (re)color cube
             if ((this.brush.mode == "color") && !result.object.base) {
@@ -390,11 +363,11 @@ class Editor {
                     Math.floor(result.object.position.y), Math.floor(result.object.position.z));
                 this.brush.targetName = "X" + intPosition.x + "Y" + intPosition.y + "Z" + intPosition.z;
                 var targetCube = this.scene.getObjectByName(this.brush.targetName);
-                targetCube.material = this.materials["color"][this.brush.colorIndex];
+                if(targetCube){
+                    targetCube.material = this.materials["color"][this.brush.colorIndex];
+                }
             }
-
         }
-
         this.stats.update();
     }
 
