@@ -29,6 +29,15 @@ import hasWebgl from 'has-webgl';
 import { config } from './config';
 import { KeyboardState } from './keywords';
 
+const SCREEN_WIDTH  = window.innerWidth;
+const SCREEN_HEIGHT = window.innerHeight;
+const VIEW_ANGLE    = 45;
+const ASPECT        = SCREEN_WIDTH / SCREEN_HEIGHT;
+const NEAR          = 0.1
+const FAR           = 2000;
+const MAP_WIDTH     = 64;     // X
+const MAP_HEIGHT    = 64;    // Z
+
 
 class Editor {
 
@@ -72,12 +81,6 @@ class Editor {
 
         this.scene = new Scene();
 
-        var SCREEN_WIDTH = window.innerWidth, SCREEN_HEIGHT = window.innerHeight;
-        var VIEW_ANGLE = 45, ASPECT = SCREEN_WIDTH / SCREEN_HEIGHT, NEAR = 0.1, FAR = 2000;
-
-        let MAP_WIDTH = 64;     // X
-        let MAP_HEIGHT = 100;    // Z
-
         this.camera = new PerspectiveCamera(VIEW_ANGLE, ASPECT, NEAR, FAR);
 
         // First Person Camera Controls
@@ -97,9 +100,9 @@ class Editor {
         let skyBox = new Mesh(skyBoxGeometry, skyBoxMaterial);
         this.scene.add(skyBox);
 
-        var axis = new AxesHelper(33);
-        axis.position.y = 0.01;
-        this.scene.add(axis);
+        // var axis = new AxesHelper(33);
+        // axis.position.y = 0.01;
+        // this.scene.add(axis);
 
         // PIANO (su cui verranno incollate le entità)
         this.createPlane(MAP_WIDTH,MAP_HEIGHT);
@@ -185,7 +188,7 @@ class Editor {
         }
         // birds-eye view
         if (n == 2) {
-            this.person.position.set(16, 42, 16);
+            this.person.position.set(MAP_HEIGHT/2, 42, MAP_HEIGHT/2);
             this.person.rotation.set(0, (-Math.PI / 2.0), 0);
             this.camera.rotation.set(-1.48, 0, 0);
         }
