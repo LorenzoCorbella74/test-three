@@ -21,7 +21,7 @@ import {
     DirectionalLightHelper,
     HemisphereLightHelper,
     FileLoader,
-    ShaderMaterial, Vector3, Object3D, Math as Mate, BackSide, 
+    ShaderMaterial, Vector3, Object3D, Math as Mate, BackSide, LineBasicMaterial, Line, Geometry
 } from 'three';
 // import OrbitControls from "three-orbitcontrols";
 import Stats from 'stats.js';
@@ -75,6 +75,9 @@ class Editor {
         var SCREEN_WIDTH = window.innerWidth, SCREEN_HEIGHT = window.innerHeight;
         var VIEW_ANGLE = 45, ASPECT = SCREEN_WIDTH / SCREEN_HEIGHT, NEAR = 0.1, FAR = 2000;
 
+        let MAP_WIDTH = 64;     // X
+        let MAP_HEIGHT = 100;    // Z
+
         this.camera = new PerspectiveCamera(VIEW_ANGLE, ASPECT, NEAR, FAR);
 
         // First Person Camera Controls
@@ -87,9 +90,10 @@ class Editor {
         let light = new PointLight(0xffffff);
         light.position.set(100, 250, 100);
         this.scene.add(light);
+
         // SKYBOX
         let skyBoxGeometry = new CubeGeometry(1000, 1000, 1000);
-        let skyBoxMaterial = new MeshBasicMaterial({ color: 0xffffee, side: BackSide });
+        let skyBoxMaterial = new MeshBasicMaterial({ color: 0xF0F0F0, side: BackSide });
         let skyBox = new Mesh(skyBoxGeometry, skyBoxMaterial);
         this.scene.add(skyBox);
 
@@ -98,20 +102,9 @@ class Editor {
         this.scene.add(axis);
 
         // PIANO (su cui verranno incollate le entità)
-        this.planeGeo = new PlaneGeometry(32, 32);
-        this.planeMat = new MeshBasicMaterial({ /* map: texture,  */color: 0xbbbbbb });
-        this.basePlane = new Mesh(this.planeGeo, this.planeMat);
-        this.basePlane.rotation.x = -Math.PI / 2;
-        this.basePlane.position.set(16, 0, 16);
-        this.basePlane.base = true;
-        this.scene.add(this.basePlane);
+        this.createPlane(MAP_WIDTH,MAP_HEIGHT);
 
-        let size = 32;
-        let divisions = 32;
-        let gridHelper = new GridHelper(size, divisions);
-        // gridHelper.rotation.x = -Math.PI / 2;
-        gridHelper.position.set(16, 0.01, 16);
-        this.scene.add(gridHelper);
+        this.createLines(MAP_WIDTH,MAP_HEIGHT);
 
         // SHAPES
         this.cubeGeo     = new CubeGeometry(1, 1, 1);
@@ -121,9 +114,9 @@ class Editor {
         this.coneGeo     = new ConeGeometry(0.5, 1,12);
 
         this.offset = [
-            new Vector3(1, 0, 0), new Vector3(-1, 0, 0),
-            new Vector3(0, 1, 0), new Vector3(0, -1, 0),
-            new Vector3(0, 0, 1), new Vector3(0, 0, -1)];
+            new Vector3(1, 0, 0), new Vector3(-1, 0, 0),    // x positiva e x negativa
+            new Vector3(0, 1, 0), new Vector3(0, -1, 0),    // y positiva e negativa
+            new Vector3(0, 0, 1), new Vector3(0, 0, -1)];   // z positiva e negativa
 
         this.colors = [
             new Color(0x66FFFF),
@@ -155,6 +148,32 @@ class Editor {
         this.scene.add(this.brush);
         this.cubeNames = [];    // array che conterrà tutti gli elementi aggiunti alla mappa
         this.mouse2D = new Vector3(0, 0, 0.5); // coordinate del mouse 
+    }
+
+    createLines(mapWidth,mapHeight) {
+        let lineMaterial = new LineBasicMaterial({ color: 0x566573 });
+        for (let i = 0; i <= mapHeight; i++) {
+            let geometry = new Geometry();
+            geometry.vertices.push(new Vector3(0, 0.01, i), new Vector3(mapWidth, 0.01, i));
+            let line = new Line(geometry, lineMaterial);
+            this.scene.add(line);
+        }
+        for (let i = 0; i <= mapWidth; i++) {
+            let geometry = new Geometry();
+            geometry.vertices.push(new Vector3(i, 0.01, 0), new Vector3(i, 0.01, mapHeight));
+            let line = new Line(geometry, lineMaterial);
+            this.scene.add(line);
+        }
+    }
+
+    createPlane(mapWidth,mapHeight) {
+        this.planeGeo = new PlaneGeometry(mapWidth,mapHeight);
+        this.planeMat = new MeshBasicMaterial({ /* map: texture,  */ color: 0xFDFEFE });
+        this.basePlane = new Mesh(this.planeGeo, this.planeMat);
+        this.basePlane.rotation.x = -Math.PI / 2;
+        this.basePlane.position.set(mapWidth/2, 0, mapHeight/2);
+        this.basePlane.base = true;
+        this.scene.add(this.basePlane);
     }
 
     viewSet(n) {
@@ -199,6 +218,28 @@ class Editor {
         return shape;
     }
 
+    // this.brush.addName = { 
+    //     x: intPosition.x, 
+    //     y: intPosition.y, 
+    //     z: intPosition.z, i: targetCube.colorIndex
+    // };
+    buildMatrix() {
+        let m = []
+        for (var i = 32 - 1; i >= 0; i--) {  // X
+            let row = [];
+            for (var j = 0; j <32; j++) { // Z
+                let found = this.cubeNames.find(e => i === e.name.x && j ===  e.name.z)
+                if (found) {
+                    row.push(found.colorIndex)
+                } else {
+                    row.push(0);
+                }
+            }
+            m.push(row)
+        }
+        return m;
+    }
+
     brushAction() {
         if (this.brush.mode == "add") {
             var shape = this.getShape(this.brush.colorIndex);
@@ -206,18 +247,18 @@ class Editor {
             shape.position.copy(this.brush.position.clone());
             shape.name = this.brush.addName;
             shape.colorIndex = this.brush.colorIndex;
-            console.log(shape.position, this.brush)
-            this.scene.add(shape);
-            this.cubeNames.push(shape.name);
+            // si aggiunge solo se non è stato già inserito
+            if(!this.cubeNames.find(e=>e===shape.name)){
+                this.scene.add(shape);
+                this.cubeNames.push(shape);
+            }
         }
-
         if (this.brush.mode == "delete") {
             var shape = this.scene.getObjectByName(this.brush.targetName);
             this.scene.remove(shape);
             var index = this.cubeNames.indexOf(this.brush.targetName);
             if (index != -1) this.cubeNames.splice(index, 1);
         }
-
         if (this.brush.mode == "color") {
             var shape = this.scene.getObjectByName(this.brush.targetName);
             if (shape) {
@@ -225,7 +266,9 @@ class Editor {
                 shape.colorIndex = this.brush.colorIndex;
             }
         }
-        console.log(this.cubeNames)
+        console.log(this.cubeNames);
+        this.mapForExport = this.buildMatrix();
+        console.log(JSON.stringify(this.mapForExport));
     }
 
     onWindowResize(event) {
@@ -237,7 +280,7 @@ class Editor {
 
     update() {
         var delta = this.clock.getDelta();
-        var moveDistance = 5 * delta; 			// 5 units per second
+        var moveDistance = 6 * delta; 			// 5 units per second
         var rotateAngle = Math.PI / 4 * delta;	// pi/4 radians (45 degrees) per second
 
         this.keyboard.update();
@@ -287,14 +330,20 @@ class Editor {
         // voxel painting controls
 
         // when digit is pressed, change brush color data
+        // TODO: aggiornare l'oggetto da copiare...
         for (var i = 0; i < 10; i++){
             if (this.keyboard.down(i.toString())){
                 this.brush.colorIndex = i;
-                console.log(this.brush);
+                // console.log(this.brush);
+                // let position = this.brush.position.clone();
+                // this.scene.remove(this.brush);
                 // this.brush =  new Mesh(this.getShape(this.brush.colorIndex));
+                // this.brush.material = this.materials["solid"][this.brush.colorIndex];
+                // // this.brush.position.copy(position);
                 // this.brush.ignore = true;    // ignored by raycaster
-                // this.brush.visible = false;
+                // this.brush.visible = true;
                 // this.brush.mode = "add";
+                // this.scene.add(this.brush);
             }
         }
 
@@ -342,15 +391,15 @@ class Editor {
                 var intPosition = new Vector3(Math.floor(result.point.x), 0, Math.floor(result.point.z));
                 let a = intPosition.clone().add(new Vector3(0.5, 0.5, 0.5));
                 this.brush.position.copy(a);
-                this.brush.addName = "X" + intPosition.x + "Y" + intPosition.y + "Z" + intPosition.z;
-                this.brush.coord = { x: intPosition.x, y: intPosition.y, z: intPosition.z };
+                // this.brush.addName = "X" + intPosition.x + "Y" + intPosition.y + "Z" + intPosition.z;
+                this.brush.addName = { x: intPosition.x, y: intPosition.y, z: intPosition.z };
             }
             // delete cube
             if ((this.brush.mode == "delete") && !result.object.base) {
                 this.brush.visible = false;
                 var intPosition = new Vector3(Math.floor(result.object.position.x),
                     Math.floor(result.object.position.y), Math.floor(result.object.position.z));
-                this.brush.targetName = "X" + intPosition.x + "Y" + intPosition.y + "Z" + intPosition.z;
+                    this.brush.addName = { x: intPosition.x, y: intPosition.y, z: intPosition.z };
                 var targetCube = this.scene.getObjectByName(this.brush.targetName);
                 if(targetCube){
                     targetCube.material = this.materials["delete"][targetCube.colorIndex];
@@ -361,7 +410,7 @@ class Editor {
                 this.brush.visible = false;
                 var intPosition = new Vector3(Math.floor(result.object.position.x),
                     Math.floor(result.object.position.y), Math.floor(result.object.position.z));
-                this.brush.targetName = "X" + intPosition.x + "Y" + intPosition.y + "Z" + intPosition.z;
+                    this.brush.addName = { x: intPosition.x, y: intPosition.y, z: intPosition.z };
                 var targetCube = this.scene.getObjectByName(this.brush.targetName);
                 if(targetCube){
                     targetCube.material = this.materials["color"][this.brush.colorIndex];
