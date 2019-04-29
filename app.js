@@ -139,8 +139,8 @@ class Editor {
         this.intersectPoint = this.raycaster.intersectObjects(this.scene.children); // find the point of intersection
         if (this.intersectPoint.length > 0) {
             var target = this.intersectPoint[0];
-            // vconsole.log(target.point);
-            this.actor.rotation.y = this.calcAngleBetweenTwoPoints(this.actor.position, target.point)
+            // console.log(target.point);
+            this.actor.rotation.y = this.calcAngleBetweenTwoPoints(this.actor.position, target.point);
         }
     }
 
@@ -173,8 +173,12 @@ class Editor {
         let dallInizio = this.clock.getElapsedTime()    // ms da quando siamo partiti (è un progressivo)
         var moveDistance = 2 * delta; 			        // 2 units per second (è funzione della dimensione dell'oggetto che si muove)
         var rotateAngle = Math.PI / 2 * delta;	        // pi/2 radians (90 degrees) per second
-        this.stats.begin()
+        this.stats.begin();
 
+        // console.log(this.actor.position, this.actor.matrixWorld)
+        // var vector = this.camera.position.clone();
+        // this.actor.applyMatrix( this.actor.matrixWorld );
+        // console.log(this.actor)
 
         // move forwards/backwards
         // ci si muove nel sistema di coordinate della MESH !!!!
