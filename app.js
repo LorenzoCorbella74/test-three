@@ -50,6 +50,9 @@ class Editor {
         // SCENE
         this.initScene();
 
+        // GRID
+        this.initGrid();
+
         // CUBE
         this.initActor();
 
@@ -69,18 +72,22 @@ class Editor {
     }
 
     initActor () {
+
+        geometry = new BoxBufferGeometry(1, 1, 1);
+        material = new MeshBasicMaterial({ color: "hsl(48, 89%, 60%)" /* , wireframe: true  */ });
+        mesh = new Mesh(geometry, material);
+        mesh.position.y = 0.5
+        let axesHelper = new AxesHelper( 1 );
+        mesh.add(axesHelper);
+        this.scene.add(mesh);
+    }
+
+    initGrid () {
         this.gridHelper = new GridHelper(20, 20, 0x444444, 0x555555);
         this.gridHelper.position.y = 0;
         this.gridHelper.position.x = 0;
         this.gridHelper.position.z = 0;
         this.scene.add(this.gridHelper);
-
-        geometry = new BoxBufferGeometry(0.2, 0.2, 0.2);
-        material = new MeshBasicMaterial({ color: "hsl(48, 89%, 60%)" /* , wireframe: true  */ });
-        mesh = new Mesh(geometry, material);
-        let axesHelper = new AxesHelper( 1 );
-        mesh.add(axesHelper);
-        this.scene.add(mesh);
     }
 
     initRenderer () {
@@ -121,14 +128,15 @@ class Editor {
 
         this.keyboard.update();
 
-        var delta = this.clock.getDelta();
-        var moveDistance = 1 * delta; 			// 1 units per second
-        var rotateAngle = Math.PI / 4 * delta;	// pi/4 radians (45 degrees) per second
+        var delta = this.clock.getDelta();              // siamo nell'ordine di 0.017480000000432483 secondi
+        let dallInizio = this.clock.getElapsedTime()    // ms da quando siamo partiti (è un progressivo)
+        var moveDistance = 2 * delta; 			        // 2 units per second (è funzione della dimensione dell'oggetto che si muove)
+        var rotateAngle = Math.PI / 2 * delta;	        // pi/2 radians (90 degrees) per second
         this.stats.begin()
-        let timer = 0.004 * Date.now();
-        
+
 
         // move forwards/backwards
+        // ci si muove nel sistema di coordinate della MESH !!!!
         if (this.keyboard.pressed("W"))
             mesh.translateZ(-moveDistance);
         if (this.keyboard.pressed("S"))
@@ -141,8 +149,8 @@ class Editor {
 
 
         // this.keys.debug();
-        mesh.position.y = 0.5+ 0.5 * Math.sin(timer);
-        // mesh.rotation.y += 0.01;
+         mesh.position.y = 1 + 0.5 * Math.sin(dallInizio+rotateAngle); // 1 è la partenza 0.5 è l'ampiezza dell'oscillazione (sin è tra -1 e 1 cos tra 0 e 1)
+         mesh.rotation.y += rotateAngle;
     }
 
     loop () {
