@@ -11,12 +11,11 @@ import {
     GridHelper,
     BoxBufferGeometry,
     Clock,
-    HemisphereLight,
-    DirectionalLight,
-    DirectionalLightHelper,
-    HemisphereLightHelper,
-    FileLoader,
-    ShaderMaterial
+    Vector2,
+    Vector3,
+    Raycaster,
+    PlaneGeometry, DoubleSide,
+    LineBasicMaterial, Line,Geometrybv
 } from 'three';
 import OrbitControls from "three-orbitcontrols";
 import Stats from 'stats.js';
@@ -34,7 +33,12 @@ class Editor {
         this.scene = null;
         this.renderer = null;
         this.controls = null;
+        this.pause = false;
         this.clock = new Clock();
+        this.mouse = new Vector2();
+        this.raycaster = new Raycaster();
+        this.intersectPoint = new Vector3();
+        // this.collidableObjects = [];
         this.container = document.querySelector("#container");
         this.stats = new Stats()
         this.keyboard = new KeyboardState(this.container);
@@ -66,6 +70,8 @@ class Editor {
         this.tanFOV = Math.tan(((Math.PI / 180) * this.camera.fov / 2));
         window.addEventListener('resize', this.onWindowResize.bind(this), false);
 
+        window.addEventListener("mousemove", this.onMouseMove.bind(this), false);
+
         // start loop
         this.loop();
 
@@ -75,19 +81,24 @@ class Editor {
 
         geometry = new BoxBufferGeometry(1, 1, 1);
         material = new MeshBasicMaterial({ color: "hsl(48, 89%, 60%)" /* , wireframe: true  */ });
-        mesh = new Mesh(geometry, material);
-        mesh.position.y = 0.5
-        let axesHelper = new AxesHelper( 1 );
-        mesh.add(axesHelper);
-        this.scene.add(mesh);
+        this.actor = new Mesh(geometry, material);
+        this.actor.position.y = 0.5
+        let axesHelper = new AxesHelper(1);
+        this.actor.add(axesHelper);
+        this.scene.add(this.actor);
     }
 
     initGrid () {
         this.gridHelper = new GridHelper(20, 20, 0x444444, 0x555555);
-        this.gridHelper.position.y = 0;
+        this.gridHelper.position.y = 0.01;
         this.gridHelper.position.x = 0;
         this.gridHelper.position.z = 0;
         this.scene.add(this.gridHelper);
+        var geometry = new PlaneGeometry(20, 20, 1);
+        var material = new MeshBasicMaterial({ color: 0xFFFFFF, side: DoubleSide });
+        this.plane = new Mesh(geometry, material);
+        this.plane.rotation.x = Math.PI / 2;  // .rotation.set(new THREE.Vector3( 0, 0, Math.PI / 2));
+        this.scene.add(this.plane);
     }
 
     initRenderer () {
@@ -111,7 +122,39 @@ class Editor {
         this.camera = new PerspectiveCamera(config.FOV, window.innerWidth / window.innerHeight, config.NEAR, config.FAR);
         // this.camera.position.z = 1.5;
         // this.camera.position.x = 1;
-        this.camera.position.set(2, 1, 5);
+        this.switchCamera('zero');
+    }
+
+    // in radianti on a 2D plane (x,z)
+    calcAngleBetweenTwoPoints(p1,p2){
+        return Math.atan2(p2.x - p1.x, p2.z - p1.z)/* * 180 / Math.PI */;
+    }
+
+    onMouseMove () {
+        //get mouse coordinates
+        this.mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+        this.mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+
+        this.raycaster.setFromCamera(this.mouse, this.camera);//set raycaster
+        this.intersectPoint = this.raycaster.intersectObjects(this.scene.children); // find the point of intersection
+        if (this.intersectPoint.length > 0) {
+            var target = this.intersectPoint[0];
+            // vconsole.log(target.point);
+            this.actor.rotation.y = this.calcAngleBetweenTwoPoints(this.actor.position, target.point)
+        }
+    }
+
+    switchCamera (type) {
+        if (type == 'volo') {
+            this.camera.position.set(0, 20, 0);
+            this.camera.rotation.set(-1.48, 0, 0);
+        } else if (type=='zero'){
+            this.camera.position.set(0, 1, 5);
+            this.camera.rotation.set(0, 0, 0);
+        } else if (type=='med'){
+            this.camera.position.set(0, 10, 10);
+            this.camera.rotation.set(-1, 0, 0);
+        }
     }
 
     onWindowResize (event) {
@@ -126,8 +169,6 @@ class Editor {
 
     update () {
 
-        this.keyboard.update();
-
         var delta = this.clock.getDelta();              // siamo nell'ordine di 0.017480000000432483 secondi
         let dallInizio = this.clock.getElapsedTime()    // ms da quando siamo partiti (è un progressivo)
         var moveDistance = 2 * delta; 			        // 2 units per second (è funzione della dimensione dell'oggetto che si muove)
@@ -138,25 +179,34 @@ class Editor {
         // move forwards/backwards
         // ci si muove nel sistema di coordinate della MESH !!!!
         if (this.keyboard.pressed("W"))
-            mesh.translateZ(-moveDistance);
+            this.actor.translateZ(-moveDistance);
         if (this.keyboard.pressed("S"))
-            mesh.translateZ(moveDistance);
+            this.actor.translateZ(moveDistance);
         // move left/right (strafe)
         if (this.keyboard.pressed("A"))
-            mesh.translateX(-moveDistance);
+            this.actor.translateX(-moveDistance);
         if (this.keyboard.pressed("D"))
-            mesh.translateX(moveDistance);
-
+            this.actor.translateX(moveDistance);
+        if (this.keyboard.pressed("V"))
+            this.switchCamera('volo');
+        if (this.keyboard.pressed("B"))
+            this.switchCamera('zero');
+        if (this.keyboard.pressed("N"))
+            this.switchCamera('med');
 
         // this.keys.debug();
-         mesh.position.y = 1 + 0.5 * Math.sin(dallInizio+rotateAngle); // 1 è la partenza 0.5 è l'ampiezza dell'oscillazione (sin è tra -1 e 1 cos tra 0 e 1)
-         mesh.rotation.y += rotateAngle;
+        // this.actor.position.y = 1 + 0.5 * Math.sin(dallInizio + rotateAngle); // 1 è la partenza 0.5 è l'ampiezza dell'oscillazione (sin è tra -1 e 1 cos tra 0 e 1)
+        // this.actor.rotation.y += rotateAngle;
     }
 
     loop () {
-        this.stats.begin()
-        this.update()
-        this.renderer.render(this.scene, this.camera);
+        this.stats.begin();
+        this.keyboard.update();
+
+        if (!this.pause) {
+            this.update()
+            this.renderer.render(this.scene, this.camera);
+        }
         this.stats.end()
         requestAnimationFrame(this.loop.bind(this));
     }
