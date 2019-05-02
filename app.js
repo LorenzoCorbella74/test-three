@@ -14,7 +14,8 @@ import {
     Vector2,
     Vector3,
     Raycaster,
-    PlaneGeometry, DoubleSide,
+    PlaneGeometry, DoubleSide, 
+    BoxHelper,
     LineBasicMaterial, Line,Geometrybv
 } from 'three';
 import OrbitControls from "three-orbitcontrols";
@@ -82,10 +83,25 @@ class Editor {
         geometry = new BoxBufferGeometry(1, 1, 1);
         material = new MeshBasicMaterial({ color: "hsl(48, 89%, 60%)" /* , wireframe: true  */ });
         this.actor = new Mesh(geometry, material);
-        this.actor.position.y = 0.5
+        this.actor.position.y = 0.51
         let axesHelper = new AxesHelper(1);
         this.actor.add(axesHelper);
         this.scene.add(this.actor);
+
+        var helper = new BoxHelper(this.actor, 0xff0000);
+        this.actor.limit = 0.5 - helper.geometry.boundingSphere.radius;
+
+        this.actor.add(helper);
+        console.log(this.actor);
+
+        var sloped = new BoxBufferGeometry(2,2, 0.2);
+        var SlopedMaterial = new MeshBasicMaterial({ color: 0x555555 , wireframe: true  });
+        this.slopedMesh = new Mesh(sloped, SlopedMaterial);
+        this.slopedMesh.position.x = 8;
+        this.slopedMesh.position.z = 5;
+        this.slopedMesh.position.y = 0.1;
+        this.slopedMesh.rotation.x = Math.PI / 2; 
+        this.scene.add(this.slopedMesh);
     }
 
     initGrid () {
@@ -201,6 +217,20 @@ class Editor {
         // this.keys.debug();
         // this.actor.position.y = 1 + 0.5 * Math.sin(dallInizio + rotateAngle); // 1 è la partenza 0.5 è l'ampiezza dell'oscillazione (sin è tra -1 e 1 cos tra 0 e 1)
         // this.actor.rotation.y += rotateAngle;
+
+        var raycaster = new Raycaster();
+        raycaster.set(this.actor.position, new Vector3(0, -1, 0));
+        let arr= this.scene.children.filter(e=>e instanceof Mesh);
+        let max = 0;
+        for (let i = 0; i < arr.length; i++) {
+            const element = arr[i];
+            var intersects = raycaster.intersectObject(element);
+            let comp =intersects.length>0? intersects[0].point.y + 0.51 : 0.51; // radius of this.actor     
+            if(comp>max){
+                max=comp;
+            }
+        }
+        this.actor.position.y = max; 
     }
 
     loop () {
