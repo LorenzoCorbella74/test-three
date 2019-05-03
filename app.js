@@ -84,6 +84,10 @@ class Editor {
         geometry = new BoxBufferGeometry(1, 1, 1);
         material = new MeshBasicMaterial({ color: "hsl(48, 89%, 60%)" /* , wireframe: true  */ });
         this.actor = new Mesh(geometry, material);
+        // before positioning, rotating, scaling
+        var helper = new BoxHelper()
+        helper.setFromObject(this.actor);
+
         this.actor.position.y = 0.51
         let axesHelper = new AxesHelper(1);
         this.actor.add(axesHelper);
@@ -91,8 +95,7 @@ class Editor {
 
         this.actor.velocity = new Vector3();
 
-        var helper = new BoxHelper(this.actor, 0xff0000);
-        this.actor.limit = 0.5 - helper.geometry.boundingSphere.radius;
+        // this.actor.limit = 0.5 - helper.geometry.boundingSphere.radius;
 
         this.actor.add(helper);
         console.log(this.actor);
