@@ -16,7 +16,8 @@ import {
     Raycaster,
     PlaneGeometry, DoubleSide, 
     BoxHelper,
-    LineBasicMaterial, Line,Geometrybv
+    Line,Geometrybv,
+    EdgesGeometry, LineBasicMaterial, LineSegments
 } from 'three';
 import OrbitControls from "three-orbitcontrols";
 import Stats from 'stats.js';
@@ -88,29 +89,40 @@ class Editor {
         this.actor.add(axesHelper);
         this.scene.add(this.actor);
 
+        this.actor.velocity = new Vector3();
+
         var helper = new BoxHelper(this.actor, 0xff0000);
         this.actor.limit = 0.5 - helper.geometry.boundingSphere.radius;
 
         this.actor.add(helper);
         console.log(this.actor);
 
-        var sloped = new BoxBufferGeometry(2,2, 0.2);
-        var SlopedMaterial = new MeshBasicMaterial({ color: 0x555555 , wireframe: true  });
-        this.slopedMesh = new Mesh(sloped, SlopedMaterial);
-        this.slopedMesh.position.x = 8;
-        this.slopedMesh.position.z = 5;
-        this.slopedMesh.position.y = 0.1;
-        this.slopedMesh.rotation.x = Math.PI / 2; 
-        this.scene.add(this.slopedMesh);
+        for (let a = 0; a < 5; a++) {
+            var sloped = new BoxBufferGeometry(2,2, 0.2*(1+a));
+            var SlopedMaterial = new MeshBasicMaterial({ color: 0x555555 });
+            var slopedMesh = new Mesh(sloped, SlopedMaterial);
+            slopedMesh.position.x = -2;
+            slopedMesh.position.z = 2*(1+a);
+            slopedMesh.position.y = 0.1;
+            slopedMesh.rotation.x = Math.PI / 2; 
+
+            /* wireframe */
+            var geo = new EdgesGeometry( slopedMesh.geometry ); // or WireframeGeometry  
+            var mat = new LineBasicMaterial( { color: 0xffffff, linewidth: 2 } );
+            var wireframe = new LineSegments( geo, mat );
+            slopedMesh.add( wireframe );
+            this.scene.add(slopedMesh);
+            
+        }
     }
 
     initGrid () {
-        this.gridHelper = new GridHelper(20, 20, 0x444444, 0x555555);
+        this.gridHelper = new GridHelper(24, 24, 0x444444, 0x555555);
         this.gridHelper.position.y = 0.01;
         this.gridHelper.position.x = 0;
         this.gridHelper.position.z = 0;
         this.scene.add(this.gridHelper);
-        var geometry = new PlaneGeometry(20, 20, 1);
+        var geometry = new PlaneGeometry(24, 24, 1);
         var material = new MeshBasicMaterial({ color: 0xFFFFFF, side: DoubleSide });
         this.plane = new Mesh(geometry, material);
         this.plane.rotation.x = Math.PI / 2;  // .rotation.set(new THREE.Vector3( 0, 0, Math.PI / 2));
@@ -156,7 +168,7 @@ class Editor {
         if (this.intersectPoint.length > 0) {
             var target = this.intersectPoint[0];
             // console.log(target.point);
-            this.actor.rotation.y = this.calcAngleBetweenTwoPoints(this.actor.position, target.point);
+            // ddthis.actor.rotation.y = this.calcAngleBetweenTwoPoints(this.actor.position, target.point);
         }
     }
 
@@ -218,19 +230,52 @@ class Editor {
         // this.actor.position.y = 1 + 0.5 * Math.sin(dallInizio + rotateAngle); // 1 è la partenza 0.5 è l'ampiezza dell'oscillazione (sin è tra -1 e 1 cos tra 0 e 1)
         // this.actor.rotation.y += rotateAngle;
 
+        /* 
+            Il soggetto in movimento sale e scende allineando la .position.y al piano su cui tocca il raggio. Problemi:
+            1) il raggio è sparato dal centro dell'oggetto pertanto finchè non si arriva a tale punto non si adeguerà al piano
+            2) il salto è netto, a gradini da un piano all'altro
+            3) per piani superiori al punto da cui è sparato  il raggio non si aggiorna il 
+        */
+        // var raycaster = new Raycaster();
+        // raycaster.set(this.actor.position, new Vector3(0, -1, 0));
+        // let floors= this.scene.children.filter(e=>e instanceof Mesh);
+        // let max = 0;
+        // for (let i = 0; i < floors.length; i++) {
+        //     const floor = floors[i];
+        //     var intersectFloor = raycaster.intersectObject(floor);
+        //     let comp =intersectFloor.length>0? intersectFloor[0].point.y + 0.51 : 0.51; // 0.51  è la distanza tra il centro e la superficie di appoggio
+        //     if(comp>max){
+        //         max=comp;
+        //     }
+        // }
+        // this.actor.position.y = max; 
+
+        let distance = 0.5;
+        let deltaS = 0.1;
+
         var raycaster = new Raycaster();
         raycaster.set(this.actor.position, new Vector3(0, -1, 0));
-        let arr= this.scene.children.filter(e=>e instanceof Mesh);
+        
+        let floors = this.scene.children.filter(e => e instanceof Mesh);
         let max = 0;
-        for (let i = 0; i < arr.length; i++) {
-            const element = arr[i];
-            var intersects = raycaster.intersectObject(element);
-            let comp =intersects.length>0? intersects[0].point.y + 0.51 : 0.51; // radius of this.actor     
-            if(comp>max){
-                max=comp;
+        for (let i = 0; i < floors.length; i++) {
+            const floor = floors[i];
+            var intersectFloor = raycaster.intersectObject(floor);
+            // se c'è almeno un piano
+            if (intersectFloor.length > 0) {
+                if (distance > intersectFloor[0].distance) {
+                    this.actor.position.y += (distance - intersectFloor[0].distance); // sale lo scalino...
+                }
+                //gravity and prevent falling through floor
+                if (distance == intersectFloor[0].distance && this.actor.velocity.y <= 0) {
+                    this.actor.velocity.y = 0;
+                } else if (distance < intersectFloor[0].distance && this.actor.velocity.y === 0) {
+                    this.actor.velocity.y -= deltaS;
+                    console.log(this.actor.velocity.y)
+                }
             }
         }
-        this.actor.position.y = max; 
+         this.actor.translateY(this.actor.velocity.y);
     }
 
     loop () {
