@@ -88,3 +88,7 @@ body {
     font-size: 12px;
     text-align:center;
   }
+
+  .selected{
+    border: 2px solid yellow;
+  }

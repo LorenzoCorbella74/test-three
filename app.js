@@ -591,10 +591,25 @@ const createContainer = () => {
     button_reset.onclick = resetMap;
     const button_clean = document.querySelector('#clean-button');
     button_clean.onclick = cleanMap;
+    let icons  = document.getElementsByTagName('img');
+    for (let a = 0; a < icons.length; a++) {
+        const element = icons[a];
+        element.onclick = onSelected.bind(element);
+    }
 
     // DEFAULT INPUTS
     document.getElementById("width").value = MAP_WIDTH;
     document.getElementById("height").value = MAP_HEIGHT;
+}
+
+const onSelected = (item)=>{
+    let icons = document.getElementsByTagName('img');
+    for (let e = 0; e < icons.length; e++) {
+        const element = icons[e];
+        element.classList.remove("selected");
+    }
+    item.srcElement.classList.add("selected");
+    app.setElement(4);
 }
 
 
