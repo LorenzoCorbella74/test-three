@@ -7,7 +7,13 @@ import {
     Mesh,
     MeshBasicMaterial,
     Color,
-    PlaneGeometry, CubeGeometry,CylinderGeometry,ConeGeometry, BoxBufferGeometry,CircleGeometry, SphereGeometry,
+    PlaneGeometry,
+    CubeGeometry,
+    CylinderGeometry,
+    ConeGeometry,
+    BoxBufferGeometry,
+    CircleGeometry,
+    SphereGeometry,
     AxesHelper,
     RepeatWrapping,
     GridHelper,
@@ -21,24 +27,38 @@ import {
     DirectionalLightHelper,
     HemisphereLightHelper,
     FileLoader,
-    ShaderMaterial, Vector3, Object3D, Math as Mate, BackSide, LineBasicMaterial, Line, Geometry
+    ShaderMaterial,
+    Vector3,
+    Object3D,
+    Math as Mate,
+    BackSide,
+    LineBasicMaterial,
+    Line,
+    Geometry
 } from 'three';
+
 // import OrbitControls from "three-orbitcontrols";
 import Stats from 'stats.js';
 import hasWebgl from 'has-webgl';
-import { config } from './config';
-import { KeyboardState } from './keywords';
+import {
+    config
+} from './config';
+import {
+    KeyboardState
+} from './keywords';
 
-const SCREEN_WIDTH  = window.innerWidth;
+const SCREEN_WIDTH = window.innerWidth;
 const SCREEN_HEIGHT = window.innerHeight;
-const VIEW_ANGLE    = 45;
-const ASPECT        = SCREEN_WIDTH / SCREEN_HEIGHT;
-const NEAR          = 0.1
-const FAR           = 2000;
+const VIEW_ANGLE = 45;
+const ASPECT = SCREEN_WIDTH / SCREEN_HEIGHT;
+const NEAR = 0.1
+const FAR = 2000;
 
 // DEFAULTS
-export let MAP_WIDTH     = 32;     // X
-export let MAP_HEIGHT    = 32;    // Z
+export let MAP_WIDTH = 32; // X
+export let MAP_HEIGHT = 32; // Z
+
+let app;
 
 
 export class Editor {
@@ -58,9 +78,9 @@ export class Editor {
     }
 
     init() {
-        this.initScene();       // SCENE
-        this.initRenderer();    // RENDERER
-        this.loop();            // GAME LOOP
+        this.initScene(); // SCENE
+        this.initRenderer(); // RENDERER
+        this.loop(); // GAME LOOP
 
         // EVENTS
         window.addEventListener('resize', this.onWindowResize.bind(this), false);
@@ -70,7 +90,10 @@ export class Editor {
     }
 
     initRenderer() {
-        this.renderer = new WebGLRenderer({ powerPreference: 'high-performance', antialias: true });
+        this.renderer = new WebGLRenderer({
+            powerPreference: 'high-performance',
+            antialias: true
+        });
         this.renderer.setSize(this.container.clientWidth, this.container.clientHeight);
         this.renderer.setPixelRatio(window.devicePixelRatio);
         this.renderer.gammaFactor = 1.5;
@@ -98,7 +121,10 @@ export class Editor {
 
         // SKYBOX
         let skyBoxGeometry = new CubeGeometry(1000, 1000, 1000);
-        let skyBoxMaterial = new MeshBasicMaterial({ color: 0xF0F0F0, side: BackSide });
+        let skyBoxMaterial = new MeshBasicMaterial({
+            color: 0xF0F0F0,
+            side: BackSide
+        });
         let skyBox = new Mesh(skyBoxGeometry, skyBoxMaterial);
         this.scene.add(skyBox);
 
@@ -107,21 +133,22 @@ export class Editor {
         // this.scene.add(axis);
 
         // PIANO (su cui verranno incollate le entità)
-        this.createPlane(MAP_WIDTH,MAP_HEIGHT);
+        this.createPlane(MAP_WIDTH, MAP_HEIGHT);
 
-        this.createLines(MAP_WIDTH,MAP_HEIGHT);
+        this.createLines(MAP_WIDTH, MAP_HEIGHT);
 
         // SHAPES
-        this.cubeGeo     = new CubeGeometry(1, 1, 1);
-        this.sphereGeo   = new SphereGeometry(0.25,12,12);
-        this.cilinderGeo = new CylinderGeometry(0.35, 0.35,1,12);
-        this.boxGeo      = new CubeGeometry(0.35, 0.35,0.65);
-        this.coneGeo     = new ConeGeometry(0.5, 1,12);
+        this.cubeGeo = new CubeGeometry(1, 1, 1);
+        this.sphereGeo = new SphereGeometry(0.25, 12, 12);
+        this.cilinderGeo = new CylinderGeometry(0.35, 0.35, 1, 12);
+        this.boxGeo = new CubeGeometry(0.35, 0.35, 0.65);
+        this.coneGeo = new ConeGeometry(0.5, 1, 12);
 
         this.offset = [
-            new Vector3(1, 0, 0), new Vector3(-1, 0, 0),    // x positiva e x negativa
-            new Vector3(0, 1, 0), new Vector3(0, -1, 0),    // y positiva e negativa
-            new Vector3(0, 0, 1), new Vector3(0, 0, -1)];   // z positiva e negativa
+            new Vector3(1, 0, 0), new Vector3(-1, 0, 0), // x positiva e x negativa
+            new Vector3(0, 1, 0), new Vector3(0, -1, 0), // y positiva e negativa
+            new Vector3(0, 0, 1), new Vector3(0, 0, -1)
+        ]; // z positiva e negativa
 
         this.colors = [
             new Color(0x66FFFF),
@@ -136,27 +163,48 @@ export class Editor {
             new Color(0xFF66FF)
         ];
 
-        this.materials = { "solid": [], "add": [], "delete": [], "color": [] };
+        this.materials = {
+            "solid": [],
+            "add": [],
+            "delete": [],
+            "color": []
+        };
         for (var i = 0; i < this.colors.length; i++) {
-            this.materials["solid"][i] = new MeshBasicMaterial({ color: this.colors[i]});
-            this.materials["add"][i] = new MeshBasicMaterial({ color: this.colors[i], transparent: true, opacity: 0.5 });
-            this.materials["delete"][i] = new MeshBasicMaterial({ color: this.colors[i], transparent: true, opacity: 0.5 });
-            this.materials["color"][i] = new MeshBasicMaterial({ color: this.colors[i], transparent: true, opacity: 0.5 });
+            this.materials["solid"][i] = new MeshBasicMaterial({
+                color: this.colors[i]
+            });
+            this.materials["add"][i] = new MeshBasicMaterial({
+                color: this.colors[i],
+                transparent: true,
+                opacity: 0.5
+            });
+            this.materials["delete"][i] = new MeshBasicMaterial({
+                color: this.colors[i],
+                transparent: true,
+                opacity: 0.5
+            });
+            this.materials["color"][i] = new MeshBasicMaterial({
+                color: this.colors[i],
+                transparent: true,
+                opacity: 0.5
+            });
         }
 
         // il brush di default
         this.brush = new Mesh(this.cubeGeo.clone(), this.materials["add"][1]);
-        this.brush.ignore = true;    // ignored by raycaster
+        this.brush.ignore = true; // ignored by raycaster
         this.brush.visible = false;
         this.brush.mode = "add";
         this.brush.colorIndex = 1;
         this.scene.add(this.brush);
-        this.cubeNames = [];    // array che conterrà tutti gli elementi aggiunti alla mappa
+        this.cubeNames = []; // array che conterrà tutti gli elementi aggiunti alla mappa
         this.mouse2D = new Vector3(0, 0, 0.5); // coordinate del mouse 
     }
 
-    createLines(mapWidth,mapHeight) {
-        let lineMaterial = new LineBasicMaterial({ color: 0x566573 });
+    createLines(mapWidth, mapHeight) {
+        let lineMaterial = new LineBasicMaterial({
+            color: 0x566573
+        });
         for (let i = 0; i <= mapHeight; i++) {
             let geometry = new Geometry();
             geometry.vertices.push(new Vector3(0, 0.01, i), new Vector3(mapWidth, 0.01, i));
@@ -171,12 +219,15 @@ export class Editor {
         }
     }
 
-    createPlane(mapWidth,mapHeight) {
-        this.planeGeo = new PlaneGeometry(mapWidth,mapHeight);
-        this.planeMat = new MeshBasicMaterial({ /* map: texture,  */ color: 0xFDFEFE });
+    createPlane(mapWidth, mapHeight) {
+        this.planeGeo = new PlaneGeometry(mapWidth, mapHeight);
+        this.planeMat = new MeshBasicMaterial({
+            /* map: texture,  */
+            color: 0xFDFEFE
+        });
         this.basePlane = new Mesh(this.planeGeo, this.planeMat);
         this.basePlane.rotation.x = -Math.PI / 2;
-        this.basePlane.position.set(mapWidth/2, 0, mapHeight/2);
+        this.basePlane.position.set(mapWidth / 2, 0, mapHeight / 2);
         this.basePlane.base = true;
         this.scene.add(this.basePlane);
     }
@@ -190,7 +241,7 @@ export class Editor {
         }
         // birds-eye view
         if (n == 2) {
-            this.person.position.set(MAP_HEIGHT/2, 42, MAP_HEIGHT/2);
+            this.person.position.set(MAP_HEIGHT / 2, 42, MAP_HEIGHT / 2);
             this.person.rotation.set(0, (-Math.PI / 2.0), 0);
             this.camera.rotation.set(-1.48, 0, 0);
         }
@@ -198,42 +249,57 @@ export class Editor {
 
     // update the mouse variable
     mouseMove(event) {
-        this.mouse2D.x = (event.clientX / window.innerWidth) * 2 - 1;
-        this.mouse2D.y = - (event.clientY / window.innerHeight) * 2 + 1;
+        this.mouse2D.x = ((event.clientX - 180) / window.innerWidth) * 2 - 1;
+        this.mouse2D.y = -(event.clientY / window.innerHeight) * 2 + 1;
     }
 
     mouseClick(event) {
         this.brushAction();
     }
 
-    getShape(index){
+    getShape(index) {
         let shape;
         switch (index) {
-            case 1: shape = new Mesh(this.cubeGeo.clone()); break;
-            case 2: shape = new Mesh(this.sphereGeo.clone()); break;
-            case 3: shape = new Mesh(this.sphereGeo.clone()); break;
-            case 4: shape = new Mesh(this.sphereGeo.clone()); break;
-            case 5: shape = new Mesh(this.sphereGeo.clone()); break;
-            case 5: shape = new Mesh(this.cilinderGeo.clone()); break;
-            case 6: shape = new Mesh(this.cilinderGeo.clone()); break;
-            case 7: shape = new Mesh(this.boxGeo.clone()); break;
-            case 8: shape = new Mesh(this.coneGeo.clone()); break;
-            default: shape = new Mesh(this.cubeGeo.clone()); break;
+            case 1:
+                shape = new Mesh(this.cubeGeo.clone());
+                break;
+            case 2:
+                shape = new Mesh(this.sphereGeo.clone());
+                break;
+            case 3:
+                shape = new Mesh(this.sphereGeo.clone());
+                break;
+            case 4:
+                shape = new Mesh(this.sphereGeo.clone());
+                break;
+            case 5:
+                shape = new Mesh(this.sphereGeo.clone());
+                break;
+            case 5:
+                shape = new Mesh(this.cilinderGeo.clone());
+                break;
+            case 6:
+                shape = new Mesh(this.cilinderGeo.clone());
+                break;
+            case 7:
+                shape = new Mesh(this.boxGeo.clone());
+                break;
+            case 8:
+                shape = new Mesh(this.coneGeo.clone());
+                break;
+            default:
+                shape = new Mesh(this.cubeGeo.clone());
+                break;
         }
         return shape;
     }
 
-    // this.brush.addName = { 
-    //     x: intPosition.x, 
-    //     y: intPosition.y, 
-    //     z: intPosition.z, i: targetCube.colorIndex
-    // };
     buildMatrix() {
         let m = []
-        for (var i = 32 - 1; i >= 0; i--) {  // X
+        for (var i = 32 - 1; i >= 0; i--) { // X
             let row = [];
-            for (var j = 0; j <32; j++) { // Z
-                let found = this.cubeNames.find(e => i === e.name.x && j ===  e.name.z)
+            for (var j = 0; j < 32; j++) { // Z
+                let found = this.cubeNames.find(e => i === e.name.x && j === e.name.z)
                 if (found) {
                     row.push(found.colorIndex)
                 } else {
@@ -253,7 +319,7 @@ export class Editor {
             shape.name = this.brush.addName;
             shape.colorIndex = this.brush.colorIndex;
             // si aggiunge solo se non è stato già inserito
-            if(!this.cubeNames.find(e=>e===shape.name)){
+            if (!this.cubeNames.find(e => e === shape.name)) {
                 this.scene.add(shape);
                 this.cubeNames.push(shape);
             }
@@ -271,9 +337,8 @@ export class Editor {
                 shape.colorIndex = this.brush.colorIndex;
             }
         }
-        console.log(this.cubeNames);
+        // console.log(this.cubeNames);
         this.mapForExport = this.buildMatrix();
-        console.log(JSON.stringify(this.mapForExport));
     }
 
     onWindowResize(event) {
@@ -285,8 +350,8 @@ export class Editor {
 
     update() {
         var delta = this.clock.getDelta();
-        var moveDistance = 6 * delta; 			// 5 units per second
-        var rotateAngle = Math.PI / 4 * delta;	// pi/4 radians (45 degrees) per second
+        var moveDistance = 6 * delta; // 5 units per second
+        var rotateAngle = Math.PI / 4 * delta; // pi/4 radians (45 degrees) per second
 
         this.keyboard.update();
 
@@ -332,12 +397,10 @@ export class Editor {
             this.viewSet(2);
 
 
-        // voxel painting controls
-
         // when digit is pressed, change brush color data
         // TODO: aggiornare l'oggetto da copiare...
-        for (var i = 0; i < 10; i++){
-            if (this.keyboard.down(i.toString())){
+        for (var i = 0; i < 10; i++) {
+            if (this.keyboard.down(i.toString())) {
                 this.brush.colorIndex = i;
                 // console.log(this.brush);
                 // let position = this.brush.position.clone();
@@ -397,16 +460,24 @@ export class Editor {
                 let a = intPosition.clone().add(new Vector3(0.5, 0.5, 0.5));
                 this.brush.position.copy(a);
                 // this.brush.addName = "X" + intPosition.x + "Y" + intPosition.y + "Z" + intPosition.z;
-                this.brush.addName = { x: intPosition.x, y: intPosition.y, z: intPosition.z };
+                this.brush.addName = {
+                    x: intPosition.x,
+                    y: intPosition.y,
+                    z: intPosition.z
+                };
             }
             // delete cube
             if ((this.brush.mode == "delete") && !result.object.base) {
                 this.brush.visible = false;
                 var intPosition = new Vector3(Math.floor(result.object.position.x),
                     Math.floor(result.object.position.y), Math.floor(result.object.position.z));
-                    this.brush.addName = { x: intPosition.x, y: intPosition.y, z: intPosition.z };
+                this.brush.addName = {
+                    x: intPosition.x,
+                    y: intPosition.y,
+                    z: intPosition.z
+                };
                 var targetCube = this.scene.getObjectByName(this.brush.targetName);
-                if(targetCube){
+                if (targetCube) {
                     targetCube.material = this.materials["delete"][targetCube.colorIndex];
                 }
             }
@@ -415,14 +486,55 @@ export class Editor {
                 this.brush.visible = false;
                 var intPosition = new Vector3(Math.floor(result.object.position.x),
                     Math.floor(result.object.position.y), Math.floor(result.object.position.z));
-                    this.brush.addName = { x: intPosition.x, y: intPosition.y, z: intPosition.z };
+                this.brush.addName = {
+                    x: intPosition.x,
+                    y: intPosition.y,
+                    z: intPosition.z
+                };
                 var targetCube = this.scene.getObjectByName(this.brush.targetName);
-                if(targetCube){
+                if (targetCube) {
                     targetCube.material = this.materials["color"][this.brush.colorIndex];
                 }
             }
         }
         this.stats.update();
+    }
+    /*
+        1 solid wall
+        2 spawn
+
+        10 health
+        11 megahealth
+        12 armour
+        13 megaArmour
+        14 quad
+        15 speed
+
+        34 shotgun
+        35 plasma
+        37 rocket
+        39 railgun
+
+        23 ammo rifle
+        24 ammo shotgun
+        25 ammo plasma
+        27 ammo rocket
+        29 ammo railgun
+
+        40 waypoints
+    */
+    setElement(num) {
+        this.brush.colorIndex = num;
+    }
+
+    clearThree(obj) {
+        while (obj.children.length > 0) {
+            this.clearThree(obj.children[0])
+            obj.remove(obj.children[0]);
+        }
+        if (obj.geometry) obj.geometry.dispose()
+        if (obj.material) obj.material.dispose()
+        if (obj.texture) obj.texture.dispose()
     }
 
     loop() {
@@ -434,22 +546,61 @@ export class Editor {
     }
 }
 
-function buildMap() {
+const resetMap = () => {
+    app.clearThree(app.scene);
     app = null;
-    MAP_WIDTH = document.getElementById("width").value;
-    MAP_HEIGHT = document.getElementById("height").value;
-    app = new Editor();
+    var elem = document.getElementById("container");
+    elem.parentNode.removeChild(elem);
+    let width = document.getElementById("width").value;
+    let height = document.getElementById("height").value;
+    if (width && height) {
+        MAP_WIDTH = width;
+        MAP_HEIGHT = height;
+        createContainer();
+    }
 }
+
+// TODO
+const cleanMap = () => {
+    app.scene.children.forEach(obj => {
+        if(obj instanceof Mesh && obj.colorIndex){
+            app.scene.remove(obj)
+        }
+        if (obj.geometry) obj.geometry.dispose()
+        if (obj.material) obj.material.dispose()
+        if (obj.texture) obj.texture.dispose()
+    });
+}
+
+const saveMap = () => {
+    console.log(JSON.stringify(app.mapForExport));
+}
+
+const createContainer = () => {
+    // create the container
+    let div = document.createElement('div');
+    div.setAttribute('id', 'container');
+    document.body.appendChild(div);
+
+    app = new Editor();
+    // EVENTS
+    const button_save = document.querySelector('#save-button');
+    button_save.onclick = saveMap;
+    const button_reset = document.querySelector('#reset-button');
+    button_reset.onclick = resetMap;
+    const button_clean = document.querySelector('#clean-button');
+    button_clean.onclick = cleanMap;
+
+    // DEFAULT INPUTS
+    document.getElementById("width").value = MAP_WIDTH;
+    document.getElementById("height").value = MAP_HEIGHT;
+}
+
 
 window.onload = () => {
     if (hasWebgl) {
-        let app = new Editor();
+        createContainer();
     } else {
         console.log('WEBGL is not supported!');
     }
 }
-
-
-
-
-

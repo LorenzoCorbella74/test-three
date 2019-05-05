@@ -5,23 +5,22 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>3D Editor</title>
+    <title>Map Editor</title>
 </head>
 
 <body>
 
-    <div id="ui" class="title"> Editor
-
-    </div>
-
     <div class="sidebar">
         <div class="form">
+            <h3>Map Editor v° 0.1 </h3>
+            <hr>
             <input id="width" type="text" placeholder="width" />
             <input id="height" type="text" placeholder="height" />
-            <button onClick="buildMap()"> Build Map</button>
-            <button onClick="save()"> saveMap</button>
+            <button id="reset-button"> Build Map</button>
+            <button id="save-button"> Save Map</button>
+            <button id="clean-button"> Clean Map</button>
+            <hr>
         </div>
-        <hr>
         <ul id="ui-entities">
             <li><span class="sub-title">Entit.</span></li>
             <li><img src="./images/invis.jpg" alt="spawn" class="icon"></li>
@@ -60,11 +59,17 @@
             <li><img src="./images/iconr_yellow.jpg" alt="ar_yellow" class="icon"> </li>
             <li><img src="./images/iconr_red.jpg" alt="ar_red" class="icon"> </li>
         </ul>
+
+        <p class="footer">
+                Made with <span style="color: #e25555;">&#9829;</span> in Rome
+        </p>
     </div>
-
-    <div id="container"></div>
-
     <script src="./app.js"></script>
+   <!--  <script>
+    function buildMap(){
+        console.log('Pressed!');
+    }
+    </script> -->
 
 </body>
 
