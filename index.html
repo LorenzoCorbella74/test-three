@@ -1,17 +1,71 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>3D Editor</title>
 </head>
+
 <body>
 
-        <div id="ui" class="title"> Three.js test</div>
+    <div id="ui" class="title"> Editor
 
-        <div id="container"></div>
+    </div>
+
+    <div class="sidebar">
+        <div class="form">
+            <input id="width" type="text" placeholder="width" />
+            <input id="height" type="text" placeholder="height" />
+            <button onClick="buildMap()"> Build Map</button>
+            <button onClick="save()"> saveMap</button>
+        </div>
+        <hr>
+        <ul id="ui-entities">
+            <li><span class="sub-title">Entit.</span></li>
+            <li><img src="./images/invis.jpg" alt="spawn" class="icon"></li>
+            <li><img src="./images/iconw_nailgun.jpg" alt="waypoints" class="icon"></li>
+            <li><img src="./images/quad.jpg" alt="quad" class="icon"></li>
+            <li><img src="./images/haste.jpg" alt="haste" class="icon"></li>
+            <li>
+                <!-- <img src="./images/regen.jpg" alt="regen" class="icon"> -->
+            <li><img src="./images/iconf_blu1.jpg" alt="flag_blu" class="icon"></li>
+            <li><img src="./images/iconf_red1.jpg" alt="flag_red" class="icon"></li>
+        </ul>
+        <ul id="ui-weapons">
+            <li><span class="sub-title">Weap.</span> </li>
+            <li><img src="./images/iconw_machinegun.jpg" alt="machinegun" class="icon"></li>
+            <li><img src="./images/iconw_shotgun.jpg" alt="shotgun" class="icon"></li>
+            <li>
+                <!-- <img src="./images/iconw_chaingun_cl2.jpg" alt="chaingun" class="icon"> -->
+            <li><img src="./images/iconw_plasma.jpg" alt="plasmagun" class="icon"></li>
+            <li><img src="./images/iconw_railgun.jpg" alt="railegun" class="icon"></li>
+            <li><img src="./images/iconw_rocket.jpg" alt="rocketlauncher" class="icon"></li>
+        </ul>
+        <ul id="ui-ammo">
+            <li><span class="sub-title">Ammo.</span></li>
+            <li><img src="./images/icona_machinegun.jpg" alt="ammo_machinegun" class="icon"> </li>
+            <li><img src="./images/icona_shotgun.jpg" alt="ammo_shotgun" class="icon"> </li>
+            <li><img src="./images/icona_plasma.jpg" alt="ammo_plasma" class="icon"></li>
+            <li><img src="./images/icona_railgun.jpg" alt="ammo_railgun" class="icon"></li>
+            <li><img src="./images/icona_rocket.jpg" alt="ammo_rocket" class="icon"> </li>
+        </ul>
+        <ul id="ui-powerups">
+            <li><span class="sub-title">Pow.</span></li>
+            <li><img src="./images/iconh_green.jpg" alt="h-green" class="icon"> </li>
+            <li><img src="./images/iconh_yellow.jpg" alt="h_yellow" class="icon"> </li>
+            <li><img src="./images/iconh_mega.jpg" alt="h_mega" class="icon"> </li>
+            <li><img src="./images/iconr_shard.jpg" alt="shard" class="icon"> </li>
+            <li><img src="./images/iconr_yellow.jpg" alt="ar_yellow" class="icon"> </li>
+            <li><img src="./images/iconr_red.jpg" alt="ar_red" class="icon"> </li>
+        </ul>
+    </div>
+
+    <div id="container"></div>
 
     <script src="./app.js"></script>
+
 </body>
+
 </html>

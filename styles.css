@@ -7,10 +7,11 @@ body {
   #container {
     position: absolute;
     top: 0;
-    left: 0;
+    left: 180px;
     width: 100%;
     height: 100%;
     z-index: 1;
+    border-right: 1px solid grey;
   }
 
   .title{
@@ -20,4 +21,63 @@ body {
     width: 100%;
     z-index: 2;
     font-size: 1.5rem; 
+  }
+
+  ul {
+    list-style-type: none;
+  }
+
+  .form{
+    z-index: 10;
+  }
+
+  .sidebar {
+    z-index: 10;
+    margin: 0;
+    padding: 0;
+    width: 180px;
+    background-color: #f1f1f1;
+    position: fixed;
+    height: 100%;
+    overflow: auto;
+  }
+
+  #ui-entities, 
+  #ui-ammo, 
+  #ui-weapons, 
+  #ui-powerups{
+    position: absolute;
+    z-index: 10;
+    padding: 2px 4px 0px 4px;
+    background-color: lightgrey;
+    border: 1px solid #d3d3d3;
+    text-align: center;
+  }
+
+  #ui-entities{
+    top: 100px;
+    left:42px;
+  }
+  #ui-ammo{
+    top: 380px;
+    left:42px;
+  }
+  #ui-weapons{
+    top: 380px;
+    left:92px;
+  } 
+  #ui-powerups{
+    top: 100px;
+    left:92px;
+  }
+
+  .icon{
+    padding:2px;
+    width: 24px;
+    height: 24px;
+  }
+
+  .sub-title{
+    position: relative;
+    bottom: 10px;
   }

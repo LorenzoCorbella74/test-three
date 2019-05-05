@@ -35,11 +35,13 @@ const VIEW_ANGLE    = 45;
 const ASPECT        = SCREEN_WIDTH / SCREEN_HEIGHT;
 const NEAR          = 0.1
 const FAR           = 2000;
-const MAP_WIDTH     = 64;     // X
-const MAP_HEIGHT    = 64;    // Z
+
+// DEFAULTS
+export let MAP_WIDTH     = 32;     // X
+export let MAP_HEIGHT    = 32;    // Z
 
 
-class Editor {
+export class Editor {
 
     constructor() {
         this.camera = null;
@@ -50,7 +52,7 @@ class Editor {
         this.container = document.querySelector("#container");
         this.stats = new Stats();
         this.keyboard = new KeyboardState(this.container);
-        document.body.appendChild(this.stats.domElement)
+        this.container.appendChild(this.stats.domElement)
 
         this.init();
     }
@@ -63,8 +65,8 @@ class Editor {
         // EVENTS
         window.addEventListener('resize', this.onWindowResize.bind(this), false);
         // when the mouse moves, call the given function
-        document.addEventListener('mousemove', this.mouseMove.bind(this), false);
-        document.addEventListener('mousedown', this.mouseClick.bind(this), false);
+        this.container.addEventListener('mousemove', this.mouseMove.bind(this), false);
+        this.container.addEventListener('mousedown', this.mouseClick.bind(this), false);
     }
 
     initRenderer() {
@@ -432,13 +434,22 @@ class Editor {
     }
 }
 
+function buildMap() {
+    app = null;
+    MAP_WIDTH = document.getElementById("width").value;
+    MAP_HEIGHT = document.getElementById("height").value;
+    app = new Editor();
+}
+
 window.onload = () => {
     if (hasWebgl) {
-        const app = new Editor();
+        let app = new Editor();
     } else {
         console.log('WEBGL is not supported!');
     }
 }
+
+
 
 
 
