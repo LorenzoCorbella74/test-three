@@ -569,6 +569,7 @@ const cleanMap = () => {
         if (obj.geometry) obj.geometry.dispose()
         if (obj.material) obj.material.dispose()
         if (obj.texture) obj.texture.dispose()
+        obj = undefined;
     });
 }
 
