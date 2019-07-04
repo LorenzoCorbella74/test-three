@@ -499,30 +499,7 @@ export class Editor {
         }
         this.stats.update();
     }
-    /*
-        1 solid wall
-        2 spawn
 
-        10 health
-        11 megahealth
-        12 armour
-        13 megaArmour
-        14 quad
-        15 speed
-
-        34 shotgun
-        35 plasma
-        37 rocket
-        39 railgun
-
-        23 ammo rifle
-        24 ammo shotgun
-        25 ammo plasma
-        27 ammo rocket
-        29 ammo railgun
-
-        40 waypoints
-    */
     setElement(num) {
         this.brush.colorIndex = num;
     }
@@ -609,9 +586,39 @@ const onSelected = (item)=>{
         element.classList.remove("selected");
     }
     item.srcElement.classList.add("selected");
-    app.setElement(4);
+    let num;
+    switch (item.srcElement.alt) {
+        // ENTITIES
+        case 'walls': num = 1; break;
+        case 'spawn': num = 2; break;
+        case 'waypoints': num = 40; break;
+        case 'quad': num = 14; break;
+        case 'haste': num = 15; break;
+        /* case 'regen': num = 1; break; */
+        case 'flag_blu': num = 16; break;
+        case 'flag_red': num = 17; break;
+        // WEAPONS
+        case 'machinegun': num = 33; break;
+        case 'shotgun': num = 34; break;
+        case 'plasmagun': num = 35; break;
+        case 'railegun': num = 39; break;
+        case 'rocketlauncher': num = 37; break;
+        // AMMO
+        case 'ammo_machinegun': num = 23; break;
+        case 'ammo_shotgun': num = 24; break;
+        case 'ammo_plasma': num = 25; break;
+        case 'ammo_railgun': num = 28; break;
+        case 'ammo_rocket': num = 27; break;
+        // POWERUPS
+        case 'h-green': num = 10; break;
+        case 'h_mega': num = 11; break;
+        case 'shard': num = 12; break;
+        case 'ar_yellow': num = 13; break;
+        case 'ar_red': num = 13; break;
+        default: num = 1; break;
+    }
+    app.setElement(num);
 }
-
 
 window.onload = () => {
     if (hasWebgl) {
