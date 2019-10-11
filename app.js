@@ -11,13 +11,15 @@ import {
     Raycaster
 } from 'three';
 
+// EXTERNAL DEPENDENCIES
 import OrbitControls from "three-orbitcontrols";
 import TWEEN from '@tweenjs/tween.js';
 import Stats from 'stats.js';
 import hasWebgl from 'has-webgl';
+import * as dat from 'dat.gui';
 
 import { KeyboardState } from './keywords';
-import {calcAngleBetweenTwoPoints} from './utils/utils';
+import { calcAngleBetweenTwoPoints } from './utils/utils';
 
 import Camera from './camera';
 import Player from './entities/player';
@@ -36,23 +38,45 @@ class Game {
         this.mouse = new Vector2();
         this.mouseRaycaster = new Raycaster();       // for mouse
         this.mouseIntersectPoint = new Vector3();    // for mouse
+        // FIXME: var mouse = new THREE.Vector2();
 
         this.container = document.querySelector("#container");
+
         this.stats = new Stats();
+        this.stats.showPanel(0); //2: mb, 1: ms, 3+: custom
+        document.body.appendChild(this.stats.dom)
+
         this.keyboard = new KeyboardState(this.container);
 
-        document.body.appendChild(this.stats.dom)
         this.init();
+    }
+
+    // Esample: https://codesandbox.io/s/cannonjs-template-to0e6
+    addDatGUI () {
+        this.gui = new dat.GUI({autoPlace: false}); /* { name: "My GUI" }; */
+        // this.gui.domElement.id = 'gui';
+        var cam = this.gui.addFolder("Camera position");
+        console.log('this.cam.position', this.cam.position)
+        cam.add(this.cam.position, "y", 0, 25).name('Y').listen();
+        cam.add(this.cam, "followPlayer").name('Follow player');
+        cam.open();
+        /*      
+        this.gui.add(options, "stop");
+        this.gui.add(options, "reset"); 
+        */
+        // this.gui.close();
+        var GUIContainer = document.getElementById('gui');
+        GUIContainer.appendChild(this.gui.domElement);
     }
 
     init () {
 
         this.initScene();      // SCENE
         this.initRenderer();   // RENDERER
-        
-        this.player = Player(this);      
+
         this.cam = Camera(this);
-        createWorld(this);      
+        this.player = Player(this);
+        createWorld(this);
 
         // CONTROLS
         this.controls = new OrbitControls(this.cam, this.renderer.domElement);
@@ -62,11 +86,20 @@ class Game {
         window.addEventListener('resize', this.onWindowResize.bind(this), false);
         window.addEventListener("mousemove", this.onMouseMove.bind(this), false);
 
+        this.addDatGUI();
+
         // start gameLoop
         this.gameLoop();
     }
 
+/*     onWindowResize() {
+        this.cam.aspect = window.innerWidth / window.innerHeight;
+        this.cam.updateProjectionMatrix();
     
+        this.renderer.setSize(window.innerWidth, window.innerHeight);
+      } */
+
+
     onWindowResize (event) {
         this.cam.aspect = this.container.clientWidth / this.container.clientHeight;
         // adjust the FOV
@@ -109,13 +142,12 @@ class Game {
         }
     }
 
-
     update () {
         this.delta = this.clock.getDelta();              // siamo nell'ordine di 0.017480000000432483 secondi
         this.dallInizio = this.clock.getElapsedTime()    // ms da quando siamo partiti (è un progressivo)
 
         this.player.update(this);
-        
+
     }
 
     gameLoop () {
@@ -139,6 +171,3 @@ window.onload = () => {
         console.log('The browser do not support WEBGL!');
     }
 }
-
-
-

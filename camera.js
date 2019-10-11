@@ -82,6 +82,13 @@ export default function Camera (game) {
         moveAndLookAt(cam, new Vector3(0, 10, 10), target.position.clone(), { duration: 1000 });
     }
 
+    cam.followPlayer = function () {
+        game.player.add(cam)
+        cam.switchCamera('player')
+    }
+
+
+
     // default
     // cam.position.z = 1.5;
     // cam.position.x = 1;
