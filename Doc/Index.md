@@ -43,11 +43,13 @@ Esempio di mini applicazione:
 </html>
 ```
 
-Ogni oggetto in three.js eredit da un master Object `Object3D` che contiene proprietà di position, rotation,scale:
+Ogni oggetto in three.js eredita da un master Object `Object3D` che contiene proprietà di position, rotation,scale:
 
 ```Javascript
 //Updating or Reading the position, rotation and scale 
-someObject.position someObject.rotation someObject.scale 
+someObject.position 
+someObject.rotation 
+someObject.scale 
 
 //Everything has the properties x,y,z to set them individually, like this: 
 someObject.position.x = 20; 
