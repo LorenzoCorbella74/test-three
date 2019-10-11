@@ -12,7 +12,7 @@ import {
 } from 'three';
 
 import OrbitControls from "three-orbitcontrols";
-
+import TWEEN from '@tweenjs/tween.js';
 import Stats from 'stats.js';
 import hasWebgl from 'has-webgl';
 
@@ -32,6 +32,7 @@ class Game {
         this.controls = null;
         this.pause = false;
         this.clock = new Clock();
+
         this.mouse = new Vector2();
         this.mouseRaycaster = new Raycaster();       // for mouse
         this.mouseIntersectPoint = new Vector3();    // for mouse
@@ -71,7 +72,8 @@ class Game {
         // adjust the FOV
         this.cam.fov = (360 / Math.PI) * Math.atan(this.tanFOV * (this.container.clientHeight / this.container.clientWidth));
         this.cam.updateProjectionMatrix();
-        this.cam.lookAt(this.scene.position);
+        // this.cam.lookAt(this.scene.position);
+        this.cam.follow(this.player)
         this.renderer.setSize(this.container.clientWidth, this.container.clientHeight);
         this.renderer.render(this.scene, this.cam);
     }
@@ -117,16 +119,16 @@ class Game {
     }
 
     gameLoop () {
+        requestAnimationFrame(this.gameLoop.bind(this));
         this.stats.begin();
         this.keyboard.update();
         this.cam.update();
-
+        TWEEN.update();
         if (!this.pause) {
             this.update()
             this.renderer.render(this.scene, this.cam);
         }
         this.stats.end()
-        requestAnimationFrame(this.gameLoop.bind(this));
     }
 }
 

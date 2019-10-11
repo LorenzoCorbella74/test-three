@@ -18,14 +18,13 @@ export default function Player (game) {
     helper.setFromObject(player);
     player.add(helper);
 
-    player.position.y = 0.5
+    player.position.y = 0.5 // put on the plane
     let axesHelper = new AxesHelper(1);
     player.add(axesHelper);
     game.scene.add(player);
+    
     player.velocity = new Vector3();
     
-
-
     player.update = (game) => {
 
         let moveDistance = 2 * game.delta; 			        // 2 units per second (è funzione della dimensione dell'oggetto che si muove)
@@ -43,6 +42,9 @@ export default function Player (game) {
         }
         if (game.keyboard.pressed("D")){
             player.translateX(moveDistance);
+        }
+        if (game.keyboard.pressed("P")){
+            game.pause = !game.pause;
         }
 
     }
