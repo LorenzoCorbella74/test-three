@@ -36,7 +36,7 @@ function moveAndLookAt(camera, dstpos, dstlookat, options) {
     var qa = qa = new Quaternion().copy(camera.quaternion); // src quaternion
     var qb = new Quaternion().setFromEuler(dstrot); // dst quaternion
     var qm = new Quaternion();
-    camera.quaternion = qm;
+    // camera.quaternion = qm;
     var o = { t: 0 };
     new TWEEN.Tween(o).to({ t: 1 }, options.duration)
         .onUpdate(function () {
@@ -54,11 +54,17 @@ export default function Camera(game) {
 
     cam.switchCamera = function (type) {
         if (type == 'volo') {
-            newPosition = game.playerGroup.position.clone().add(new Vector3(0, 15, 0))
-            moveAndLookAt(cam, newPosition, game.playerGroup.position, { duration: 1000 });
+            // newPosition = game.playerGroup.position.clone().add(new Vector3(0, 15, 0))
+            // moveAndLookAt(cam, newPosition, game.playerGroup.position.clone(), { duration: 1000 });
+            cam.position.z = 0;
+            cam.position.y = 15;
+            //cam.lookAt(game.playerGroup.position)
         } else if (type == 'player') {
-            newPosition = game.playerGroup.position.clone().add(new Vector3(0, 5, 5))
-            moveAndLookAt(cam, newPosition, game.playerGroup.position, { duration: 1000 });
+            // newPosition = game.playerGroup.position.clone().add(new Vector3(0, 5, 5))
+            // moveAndLookAt(cam, newPosition, game.playerGroup.position.clone(), { duration: 1000 });
+            cam.position.z = 5;
+            cam.position.y = 5;
+            // cam.lookAt(game.playerGroup.position)
         }
     }
 
@@ -81,8 +87,8 @@ export default function Camera(game) {
     }
 
     // default
-    // cam.position.z = 1.5;
-    // cam.position.x = 1;
+    // cam.position.z = 2.5;
+    // cam.position.y = 5;
     setTimeout(() => {
         cam.switchCamera('volo');
     }, 10);

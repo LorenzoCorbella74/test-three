@@ -96,7 +96,7 @@ class Game {
         // this.controls.update();
 
         // remember these initial values on RESIZE
-        this.tanFOV = Math.tan(((Math.PI / 180) * this.cam.fov / 2));
+        // this.tanFOV = Math.tan(((Math.PI / 180) * this.cam.fov / 2));
         window.addEventListener('resize', this.onWindowResize.bind(this), false);
         window.addEventListener("mousemove", this.onMouseMove.bind(this), false);
 
@@ -109,7 +109,7 @@ class Game {
     onWindowResize(event) {
         this.cam.aspect = this.container.clientWidth / this.container.clientHeight;
         // adjust the FOV
-        this.cam.fov = (360 / Math.PI) * Math.atan(this.tanFOV * (this.container.clientHeight / this.container.clientWidth));
+        //this.cam.fov = (360 / Math.PI) * Math.atan(this.tanFOV * (this.container.clientHeight / this.container.clientWidth));
         this.cam.updateProjectionMatrix();
         this.renderer.setSize(this.container.clientWidth, this.container.clientHeight);
     }
