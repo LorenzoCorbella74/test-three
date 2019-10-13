@@ -19,6 +19,10 @@ export default function Player(game) {
     let player = new Mesh(geometry, material);
     player.name = 'player';
 
+    // TODO: userData = {...}
+    let SPEED = 4;
+
+
     // set before positioning, rotating, scaling
     var helper = new BoxHelper()
     helper.setFromObject(player);
@@ -32,11 +36,11 @@ export default function Player(game) {
     player.add(axesHelper);
     game.scene.add(playerGroup);
 
-    player.velocity = new Vector3();
+    player.velocity = new Vector3();    // TODO: sommare alla posizione la velocità
 
     player.update = (game) => {
 
-        let moveDistance = 2 * game.delta; 			        // 2 units per second (è funzione della dimensione dell'oggetto che si muove)
+        let moveDistance = SPEED * game.delta; 			        // 2 units per second (è funzione della dimensione dell'oggetto che si muove)
         let rotateAngle = Math.PI / 2 * game.delta;	        // pi/2 radians (90 degrees) per second
 
         if (game.keyboard.pressed("W")) {

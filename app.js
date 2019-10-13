@@ -13,6 +13,7 @@ import {
 
 // EXTERNAL DEPENDENCIES
 import OrbitControls from "three-orbitcontrols";
+import TrackballControls from "three-trackballcontrols";
 import TWEEN from '@tweenjs/tween.js';
 import Stats from 'stats.js';
 import hasWebgl from 'has-webgl';
@@ -80,16 +81,19 @@ class Game {
         let p = Player(this)
         this.player = p.player;
         this.playerGroup = p.playerGroup;
-        this.cam.lookAt(/* this.playerGroup */this.scene.position);
-        // this.cam.follow(this.playerGroup)
+        this.playerGroup.add(this.cam);
+        this.cam.lookAt(this.playerGroup);
 
         createWorld(this);
 
         // CONTROLS
         this.controls = new OrbitControls(this.cam, this.renderer.domElement);
+        this.controls.autoRotate = false;
         this.controls.enablePan = false;
         this.controls.enableRotate = false;
         this.controls.enableZoom = false;
+        this.controls.target = this.playerGroup.position
+        // this.controls.update();
 
         // remember these initial values on RESIZE
         this.tanFOV = Math.tan(((Math.PI / 180) * this.cam.fov / 2));

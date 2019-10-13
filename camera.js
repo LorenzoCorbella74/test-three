@@ -36,7 +36,7 @@ function moveAndLookAt(camera, dstpos, dstlookat, options) {
     var qa = qa = new Quaternion().copy(camera.quaternion); // src quaternion
     var qb = new Quaternion().setFromEuler(dstrot); // dst quaternion
     var qm = new Quaternion();
-    // camera.quaternion = qm;
+    camera.quaternion = qm;
     var o = { t: 0 };
     new TWEEN.Tween(o).to({ t: 1 }, options.duration)
         .onUpdate(function () {
@@ -54,41 +54,29 @@ export default function Camera(game) {
 
     cam.switchCamera = function (type) {
         if (type == 'volo') {
-            // cam.position.set(0, 20, 0);
-            // cam.rotation.set(-1.48, 0, 0);
             newPosition = game.playerGroup.position.clone().add(new Vector3(0, 15, 0))
             moveAndLookAt(cam, newPosition, game.playerGroup.position, { duration: 1000 });
-        } else if (type == 'origin') {
-            newPosition = new Vector3(0, 1, 5)
-            moveAndLookAt(cam, newPosition, game.playerGroup.position, { duration: 1000 });
         } else if (type == 'player') {
-            newPosition = game.playerGroup.position.clone().add(new Vector3(0, 0, 0))
+            newPosition = game.playerGroup.position.clone().add(new Vector3(0, 5, 5))
             moveAndLookAt(cam, newPosition, game.playerGroup.position, { duration: 1000 });
         }
     }
 
     cam.update = function () {
-
-
-        // cam.position.copy(newPosition);
-        // cam.lookAt(game.playerGroup);
-
-        if (game.keyboard.pressed("V"))
+        if (game.keyboard.pressed("V")) {
             cam.switchCamera('volo');
-        if (game.keyboard.pressed("B"))
-            cam.switchCamera('origin');
-        if (game.keyboard.pressed("M"))
+        }
+        if (game.keyboard.pressed("B")) {
             cam.switchCamera('player');
+        }
     }
 
     // https://discourse.threejs.org/t/solved-smooth-chase-camera-for-an-object/3216/5
     cam.follow = function (target) {
-        // target.add(cam)
-        moveAndLookAt(cam, new Vector3(0, 10, 10), target.position.clone(), { duration: 1000 });
+        moveAndLookAt(cam, target.position.clone().add(new Vector3(0, 15, 0)), target.position.clone(), { duration: 1000 });
     }
 
     cam.followPlayer = function () {
-        // game.playerGroup.add(cam)
         cam.switchCamera('player')
     }
 
