@@ -6,10 +6,10 @@ import {
 } from 'three';
 
 
-export default function createWorld (game) {
+export default function createWorld(game) {
 
     let gridHelper = new GridHelper(24, 24, 0x444444, 0x555555);
-    gridHelper.position.y = 0;
+    gridHelper.position.y = 0.05;
     gridHelper.position.x = 0;
     gridHelper.position.z = 0;
     game.scene.add(gridHelper);

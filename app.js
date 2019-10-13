@@ -38,7 +38,6 @@ class Game {
         this.mouse = new Vector2();
         this.mouseRaycaster = new Raycaster();       // for mouse
         this.mouseIntersectPoint = new Vector3();    // for mouse
-        // FIXME: var mouse = new THREE.Vector2();
 
         this.container = document.querySelector("#container");
 
@@ -52,34 +51,45 @@ class Game {
     }
 
     // Esample: https://codesandbox.io/s/cannonjs-template-to0e6
-    addDatGUI () {
-        this.gui = new dat.GUI({autoPlace: false}); /* { name: "My GUI" }; */
-        // this.gui.domElement.id = 'gui';
-        var cam = this.gui.addFolder("Camera position");
-        console.log('this.cam.position', this.cam.position)
+    addDatGUI() {
+        this.gui = new dat.GUI({ autoPlace: false });
+
+        let cam = this.gui.addFolder("Camera position");
         cam.add(this.cam.position, "y", 0, 25).name('Y').listen();
         cam.add(this.cam, "followPlayer").name('Follow player');
         cam.open();
-        /*      
-        this.gui.add(options, "stop");
-        this.gui.add(options, "reset"); 
-        */
-        // this.gui.close();
-        var GUIContainer = document.getElementById('gui');
+
+        let controls = this.gui.addFolder("Controls");
+        controls.add(this.controls, "enablePan").name('Enable pan');
+        controls.add(this.controls, "enableRotate").name('Enable rotate');
+        controls.add(this.controls, "enableZoom").name('Enable zoom');
+        controls.open();
+
+        const GUIContainer = document.getElementById('gui');
         GUIContainer.appendChild(this.gui.domElement);
+        // this.gui.close();
     }
 
-    init () {
+    init() {
 
         this.initScene();      // SCENE
         this.initRenderer();   // RENDERER
 
         this.cam = Camera(this);
-        this.player = Player(this);
+
+        let p = Player(this)
+        this.player = p.player;
+        this.playerGroup = p.playerGroup;
+        this.cam.lookAt(/* this.playerGroup */this.scene.position);
+        // this.cam.follow(this.playerGroup)
+
         createWorld(this);
 
         // CONTROLS
         this.controls = new OrbitControls(this.cam, this.renderer.domElement);
+        this.controls.enablePan = false;
+        this.controls.enableRotate = false;
+        this.controls.enableZoom = false;
 
         // remember these initial values on RESIZE
         this.tanFOV = Math.tan(((Math.PI / 180) * this.cam.fov / 2));
@@ -92,26 +102,15 @@ class Game {
         this.gameLoop();
     }
 
-/*     onWindowResize() {
-        this.cam.aspect = window.innerWidth / window.innerHeight;
-        this.cam.updateProjectionMatrix();
-    
-        this.renderer.setSize(window.innerWidth, window.innerHeight);
-      } */
-
-
-    onWindowResize (event) {
+    onWindowResize(event) {
         this.cam.aspect = this.container.clientWidth / this.container.clientHeight;
         // adjust the FOV
         this.cam.fov = (360 / Math.PI) * Math.atan(this.tanFOV * (this.container.clientHeight / this.container.clientWidth));
         this.cam.updateProjectionMatrix();
-        // this.cam.lookAt(this.scene.position);
-        this.cam.follow(this.player)
         this.renderer.setSize(this.container.clientWidth, this.container.clientHeight);
-        this.renderer.render(this.scene, this.cam);
     }
 
-    initRenderer () {
+    initRenderer() {
         this.renderer = new WebGLRenderer({ powerPreference: 'high-performance', antialias: true });
         this.renderer.setSize(this.container.clientWidth, this.container.clientHeight);
         this.renderer.setPixelRatio(window.devicePixelRatio);
@@ -121,14 +120,14 @@ class Game {
         this.container.appendChild(this.renderer.domElement);
     }
 
-    initScene () {
+    initScene() {
         this.scene = new Scene();
         this.scene.background = new Color("#1B2631");
         let axesHelper = new AxesHelper(3);
         this.scene.add(axesHelper);
     }
 
-    onMouseMove () {
+    onMouseMove() {
         //get mouse coordinates
         this.mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
         this.mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
@@ -138,27 +137,34 @@ class Game {
         if (this.mouseIntersectPoint.length > 0) {
             var target = this.mouseIntersectPoint[0];
             // console.log(target.point);
+            var vector = new Vector3();
+            // vector = Object3D.getWorldPosition(this.player);
+            vector.setFromMatrixPosition(this.player.matrixWorld);
+            target.point = target.point.sub(vector);
             this.player.rotation.y = calcAngleBetweenTwoPoints(this.player.position, target.point);
         }
     }
 
-    update () {
+    update() {
         this.delta = this.clock.getDelta();              // siamo nell'ordine di 0.017480000000432483 secondi
         this.dallInizio = this.clock.getElapsedTime()    // ms da quando siamo partiti (è un progressivo)
 
         this.player.update(this);
-
     }
 
-    gameLoop () {
+    gameLoop() {
         requestAnimationFrame(this.gameLoop.bind(this));
         this.stats.begin();
-        this.keyboard.update();
-        this.cam.update();
-        TWEEN.update();
+
         if (!this.pause) {
+            this.keyboard.update();
+            this.controls.update();
+            this.cam.update();
             this.update()
+            TWEEN.update();
             this.renderer.render(this.scene, this.cam);
+        } else {
+            // TODO: show pause dialogue
         }
         this.stats.end()
     }

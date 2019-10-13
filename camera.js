@@ -7,7 +7,7 @@ import TWEEN from '@tweenjs/tween.js';
 import { PerspectiveCamera } from 'three';
 
 // https://stackoverflow.com/questions/28091876/tween-camera-position-while-rotation-with-slerp-three-js
-function moveAndLookAt (camera, dstpos, dstlookat, options) {
+function moveAndLookAt(camera, dstpos, dstlookat, options) {
     options || (options = { duration: 300 });
 
     var origpos = new Vector3().copy(camera.position); // original position
@@ -47,52 +47,57 @@ function moveAndLookAt (camera, dstpos, dstlookat, options) {
 
 }
 
-export default function Camera (game) {
+export default function Camera(game) {
 
     let cam = new PerspectiveCamera(config.FOV, window.innerWidth / window.innerHeight, config.NEAR, config.FAR);
+    let newPosition = new Vector3(0, 0, 0);
 
     cam.switchCamera = function (type) {
         if (type == 'volo') {
             // cam.position.set(0, 20, 0);
             // cam.rotation.set(-1.48, 0, 0);
-            moveAndLookAt(cam, new Vector3(0, 20, 0), new Vector3(0, 0, 0), { duration: 1000 });
+            newPosition = game.playerGroup.position.clone().add(new Vector3(0, 15, 0))
+            moveAndLookAt(cam, newPosition, game.playerGroup.position, { duration: 1000 });
         } else if (type == 'origin') {
-            moveAndLookAt(cam, new Vector3(0, 1, 5), new Vector3(0, 0, 0), { duration: 1000 });
-        } else if (type == 'med') {
-            moveAndLookAt(cam, new Vector3(0, 10, 10), new Vector3(-1, 0, 0), { duration: 1000 });
+            newPosition = new Vector3(0, 1, 5)
+            moveAndLookAt(cam, newPosition, game.playerGroup.position, { duration: 1000 });
         } else if (type == 'player') {
-            moveAndLookAt(cam, new Vector3(0, 10, 10), game.player.position.clone(), { duration: 1000 });
+            newPosition = game.playerGroup.position.clone().add(new Vector3(0, 0, 0))
+            moveAndLookAt(cam, newPosition, game.playerGroup.position, { duration: 1000 });
         }
     }
 
     cam.update = function () {
+
+
+        // cam.position.copy(newPosition);
+        // cam.lookAt(game.playerGroup);
+
         if (game.keyboard.pressed("V"))
             cam.switchCamera('volo');
         if (game.keyboard.pressed("B"))
             cam.switchCamera('origin');
-        if (game.keyboard.pressed("N"))
-            cam.switchCamera('med');
         if (game.keyboard.pressed("M"))
             cam.switchCamera('player');
     }
 
     // https://discourse.threejs.org/t/solved-smooth-chase-camera-for-an-object/3216/5
     cam.follow = function (target) {
-        target.add(cam)
+        // target.add(cam)
         moveAndLookAt(cam, new Vector3(0, 10, 10), target.position.clone(), { duration: 1000 });
     }
 
     cam.followPlayer = function () {
-        game.player.add(cam)
+        // game.playerGroup.add(cam)
         cam.switchCamera('player')
     }
-
-
 
     // default
     // cam.position.z = 1.5;
     // cam.position.x = 1;
-    cam.switchCamera('origin');
+    setTimeout(() => {
+        cam.switchCamera('volo');
+    }, 10);
 
     return cam;
 }
