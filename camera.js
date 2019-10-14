@@ -1,10 +1,32 @@
 import { config } from './config';
 
-import { Vector3, Quaternion, Euler } from 'three';
+import { Object3D, Vector3, Matrix4, Quaternion, Euler } from 'three';
 
 import TWEEN from '@tweenjs/tween.js';
 
 import { PerspectiveCamera } from 'three';
+
+Object3D.prototype.lookAtObject3D = function() {
+
+    var m1 = new Matrix4();
+    var position = new Vector3();
+    var parentMatrix;
+
+    return function lookAtObject3D( object ) {
+        object.updateWorldMatrix( true, false );
+        if ( this.parent ) {
+            this.parent.updateWorldMatrix( true, false );
+            parentMatrix = this.parent.matrixWorld;
+        } else {
+            parentMatrix = m1.identity();
+        }
+        m1
+            .getInverse( parentMatrix )
+            .multiply( object.matrixWorld );
+        position.setFromMatrixPosition( m1 );
+        this.lookAt( position );
+    };
+}();
 
 // https://stackoverflow.com/questions/28091876/tween-camera-position-while-rotation-with-slerp-three-js
 function moveAndLookAt(camera, dstpos, dstlookat, options) {
@@ -53,19 +75,24 @@ export default function Camera(game) {
     let newPosition = new Vector3(0, 0, 0);
 
     cam.switchCamera = function (type) {
+        // game.controls.enabled = false;
         if (type == 'volo') {
             // newPosition = game.playerGroup.position.clone().add(new Vector3(0, 15, 0))
-            // moveAndLookAt(cam, newPosition, game.playerGroup.position.clone(), { duration: 1000 });
-            cam.position.z = 0;
+            newPosition = game.controls.target.clone().add(new Vector3(0, 15, 0))
+            moveAndLookAt(cam, newPosition,  game.playerGroup.position.clone() , { duration: 1000 });
+            /* cam.position.z = 0;
             cam.position.y = 15;
-            //cam.lookAt(game.playerGroup.position)
+            cam.lookAt( game.controls.target );  */
         } else if (type == 'player') {
-            // newPosition = game.playerGroup.position.clone().add(new Vector3(0, 5, 5))
-            // moveAndLookAt(cam, newPosition, game.playerGroup.position.clone(), { duration: 1000 });
-            cam.position.z = 5;
+             // newPosition = game.playerGroup.position.clone().add(new Vector3(0, 5, 5))
+             newPosition = game.controls.target.clone().add(new Vector3(0, 5, 5))
+             moveAndLookAt(cam, newPosition, game.playerGroup.position.clone(), { duration: 1000 });
+            /* cam.position.z = 5;
             cam.position.y = 5;
-            // cam.lookAt(game.playerGroup.position)
+            cam.lookAt( game.controls.target );  */
         }
+        // game.controls.enabled = true;
+        game.controls.update();
     }
 
     cam.update = function () {
@@ -95,6 +122,21 @@ export default function Camera(game) {
 
     return cam;
 }
+
+
+/*
+
+OrbitControls breaks if camera's parent is moving (lookAt() issue
+https://github.com/mrdoob/three.js/issues/15267
+
+
+https://stackoverflow.com/questions/37482231/camera-position-changes-in-three-orbitcontrols-in-three-js
+https://stackoverflow.com/questions/52607157/move-camera-and-update-its-orbitcontrol-in-three-js
+
+
+https://github.com/mrdoob/three.js/pull/16374
+
+*/
 
 
 

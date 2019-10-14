@@ -13,7 +13,7 @@ import {
 
 // EXTERNAL DEPENDENCIES
 import OrbitControls from "three-orbitcontrols";
-import TrackballControls from "three-trackballcontrols";
+
 import TWEEN from '@tweenjs/tween.js';
 import Stats from 'stats.js';
 import hasWebgl from 'has-webgl';
@@ -82,7 +82,7 @@ class Game {
         this.player = p.player;
         this.playerGroup = p.playerGroup;
         this.playerGroup.add(this.cam);
-        this.cam.lookAt(this.playerGroup);
+        // this.cam.lookAt(this.playerGroup.position);
 
         createWorld(this);
 
