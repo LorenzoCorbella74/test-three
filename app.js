@@ -162,7 +162,7 @@ class Game {
 
         if (!this.pause) {
             this.keyboard.update();
-            this.controls.update();
+            // this.controls.update();
             this.cam.update();
             this.update()
             TWEEN.update();

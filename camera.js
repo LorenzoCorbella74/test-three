@@ -6,25 +6,25 @@ import TWEEN from '@tweenjs/tween.js';
 
 import { PerspectiveCamera } from 'three';
 
-Object3D.prototype.lookAtObject3D = function() {
+Object3D.prototype.lookAtObject3D = function () {
 
     var m1 = new Matrix4();
     var position = new Vector3();
     var parentMatrix;
 
-    return function lookAtObject3D( object ) {
-        object.updateWorldMatrix( true, false );
-        if ( this.parent ) {
-            this.parent.updateWorldMatrix( true, false );
+    return function lookAtObject3D(object) {
+        object.updateWorldMatrix(true, false);
+        if (this.parent) {
+            this.parent.updateWorldMatrix(true, false);
             parentMatrix = this.parent.matrixWorld;
         } else {
             parentMatrix = m1.identity();
         }
         m1
-            .getInverse( parentMatrix )
-            .multiply( object.matrixWorld );
-        position.setFromMatrixPosition( m1 );
-        this.lookAt( position );
+            .getInverse(parentMatrix)
+            .multiply(object.matrixWorld);
+        position.setFromMatrixPosition(m1);
+        this.lookAt(position);
     };
 }();
 
@@ -75,23 +75,32 @@ export default function Camera(game) {
     let newPosition = new Vector3(0, 0, 0);
 
     cam.switchCamera = function (type) {
-        // game.controls.enabled = false;
+        //game.controls.enabled = false;
         if (type == 'volo') {
-            // newPosition = game.playerGroup.position.clone().add(new Vector3(0, 15, 0))
-            newPosition = game.controls.target.clone().add(new Vector3(0, 15, 0))
-            moveAndLookAt(cam, newPosition,  game.playerGroup.position.clone() , { duration: 1000 });
-            /* cam.position.z = 0;
+            //newPosition = game.playerGroup.position.clone().add(new Vector3(0, 15, 0))
+            //newPosition = game.controls.target.clone().add(new Vector3(0, 15, 0))
+            //moveAndLookAt(cam, newPosition, game.playerGroup.position.clone(), { duration: 1000 });
+            // newPosition = localToWorld(game.controls.target);
+            // console.log('Local: ', game.playerGroup.position);
+            // var v = new Vector3();
+            // v.copy(game.playerGroup.position);
+            // game.playerGroup.localToWorld(v);
+            // game.playerGroup.parent.worldToLocal(v);
+            // console.log('Global: ', v);
+            cam.position.z = 0;
             cam.position.y = 15;
-            cam.lookAt( game.controls.target );  */
+            //cam.lookAt(game.playerGroup.position);
+            // cam.lookAt(game.playerGroup.position);
         } else if (type == 'player') {
-             // newPosition = game.playerGroup.position.clone().add(new Vector3(0, 5, 5))
-             newPosition = game.controls.target.clone().add(new Vector3(0, 5, 5))
-             moveAndLookAt(cam, newPosition, game.playerGroup.position.clone(), { duration: 1000 });
-            /* cam.position.z = 5;
+            // newPosition = game.playerGroup.position.clone().add(new Vector3(0, 5, 5))
+            // newPosition = game.controls.target.clone().add(new Vector3(0, 5, 5))
+            // moveAndLookAt(cam, newPosition, game.playerGroup.position.clone(), { duration: 1000 });
+            // newPosition.localToWorld(game.controls.target);
+            cam.position.z = 5;
             cam.position.y = 5;
-            cam.lookAt( game.controls.target );  */
+            // cam.lookAt(newPosition);
         }
-        // game.controls.enabled = true;
+        //game.controls.enabled = true;
         game.controls.update();
     }
 
