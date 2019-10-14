@@ -29,23 +29,22 @@ Object3D.prototype.lookAtObject3D = function () {
 }();
 
 // https://stackoverflow.com/questions/28091876/tween-camera-position-while-rotation-with-slerp-three-js
-function moveAndLookAt(camera, dstpos, dstlookat, options) {
+function moveAndLookAt(camera, dstpos, angles, options) {
     options || (options = { duration: 300 });
 
     var origpos = new Vector3().copy(camera.position); // original position
-    var origrot = new Euler().copy(camera.rotation); // original rotation
+    var origrot = new Vector3().copy(camera.rotation); // original rotation
+    // console.log('Original: ', origrot);
 
     camera.position.set(dstpos.x, dstpos.y, dstpos.z);
-    camera.lookAt(dstlookat);
-    var dstrot = new Euler().copy(camera.rotation)
+    camera.rotation.set(angles.x, angles.y, angles.z);
+    var dstrot = new Euler().copy(camera.rotation);
+    // console.log('Dst rotation: ', dstrot);
+    camera.lookAt(camera.target);
 
     // reset original position and rotation
     camera.position.set(origpos.x, origpos.y, origpos.z);
     camera.rotation.set(origrot.x, origrot.y, origrot.z);
-
-    //
-    // Tweening
-    //
 
     // position
     new TWEEN.Tween(camera.position).to({
@@ -67,41 +66,19 @@ function moveAndLookAt(camera, dstpos, dstlookat, options) {
         })
         .start();
 
+
 }
 
 export default function Camera(game) {
 
     let cam = new PerspectiveCamera(config.FOV, window.innerWidth / window.innerHeight, config.NEAR, config.FAR);
-    let newPosition = new Vector3(0, 0, 0);
 
     cam.switchCamera = function (type) {
-        //game.controls.enabled = false;
         if (type == 'volo') {
-            //newPosition = game.playerGroup.position.clone().add(new Vector3(0, 15, 0))
-            //newPosition = game.controls.target.clone().add(new Vector3(0, 15, 0))
-            //moveAndLookAt(cam, newPosition, game.playerGroup.position.clone(), { duration: 1000 });
-            // newPosition = localToWorld(game.controls.target);
-            // console.log('Local: ', game.playerGroup.position);
-            // var v = new Vector3();
-            // v.copy(game.playerGroup.position);
-            // game.playerGroup.localToWorld(v);
-            // game.playerGroup.parent.worldToLocal(v);
-            // console.log('Global: ', v);
-            cam.position.z = 0;
-            cam.position.y = 15;
-            //cam.lookAt(game.playerGroup.position);
-            // cam.lookAt(game.playerGroup.position);
+            moveAndLookAt(cam, new Vector3(0, 15, 0), new Vector3(-1.5, 0, 0), { duration: 1000 });
         } else if (type == 'player') {
-            // newPosition = game.playerGroup.position.clone().add(new Vector3(0, 5, 5))
-            // newPosition = game.controls.target.clone().add(new Vector3(0, 5, 5))
-            // moveAndLookAt(cam, newPosition, game.playerGroup.position.clone(), { duration: 1000 });
-            // newPosition.localToWorld(game.controls.target);
-            cam.position.z = 5;
-            cam.position.y = 5;
-            // cam.lookAt(newPosition);
+            moveAndLookAt(cam, new Vector3(0, 5, 5), new Vector3(-.5, 0, 0), { duration: 1000 });
         }
-        //game.controls.enabled = true;
-        game.controls.update();
     }
 
     cam.update = function () {
@@ -115,7 +92,7 @@ export default function Camera(game) {
 
     // https://discourse.threejs.org/t/solved-smooth-chase-camera-for-an-object/3216/5
     cam.follow = function (target) {
-        moveAndLookAt(cam, target.position.clone().add(new Vector3(0, 15, 0)), target.position.clone(), { duration: 1000 });
+        moveAndLookAt(cam, target.position.clone().add(new Vector3(0, 15, 0)), new Vector3(-1.5, 0, 0), { duration: 1000 });
     }
 
     cam.followPlayer = function () {
@@ -123,8 +100,6 @@ export default function Camera(game) {
     }
 
     // default
-    // cam.position.z = 2.5;
-    // cam.position.y = 5;
     setTimeout(() => {
         cam.switchCamera('volo');
     }, 10);

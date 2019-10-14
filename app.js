@@ -32,7 +32,7 @@ class Game {
         this.cam = {};
         this.scene = null;
         this.renderer = null;
-        this.controls = null;
+        //this.controls = null;
         this.pause = false;
         this.clock = new Clock();
 
@@ -60,11 +60,11 @@ class Game {
         cam.add(this.cam, "followPlayer").name('Follow player');
         cam.open();
 
-        let controls = this.gui.addFolder("Controls");
-        controls.add(this.controls, "enablePan").name('Enable pan');
-        controls.add(this.controls, "enableRotate").name('Enable rotate');
-        controls.add(this.controls, "enableZoom").name('Enable zoom');
-        controls.open();
+        // let controls = this.gui.addFolder("Controls");
+        // controls.add(this.controls, "enablePan").name('Enable pan');
+        // controls.add(this.controls, "enableRotate").name('Enable rotate');
+        // controls.add(this.controls, "enableZoom").name('Enable zoom');
+        // controls.open();
 
         const GUIContainer = document.getElementById('gui');
         GUIContainer.appendChild(this.gui.domElement);
@@ -82,17 +82,17 @@ class Game {
         this.player = p.player;
         this.playerGroup = p.playerGroup;
         this.playerGroup.add(this.cam);
-        // this.cam.lookAt(this.playerGroup.position);
+        this.cam.target = this.playerGroup.position;
 
         createWorld(this);
 
         // CONTROLS
-        this.controls = new OrbitControls(this.cam, this.renderer.domElement);
-        this.controls.autoRotate = false;
-        this.controls.enablePan = false;
-        this.controls.enableRotate = false;
-        this.controls.enableZoom = false;
-        this.controls.target = this.playerGroup.position
+        // this.controls = new OrbitControls(this.cam, this.renderer.domElement);
+        // this.controls.autoRotate = false;
+        // this.controls.enablePan = false;
+        // this.controls.enableRotate = false;
+        // this.controls.enableZoom = false;
+        // this.controls.target = this.playerGroup.position
         // this.controls.update();
 
         // remember these initial values on RESIZE
