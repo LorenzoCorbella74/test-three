@@ -12,8 +12,6 @@ import {
 } from 'three';
 
 // EXTERNAL DEPENDENCIES
-import OrbitControls from "three-orbitcontrols";
-
 import TWEEN from '@tweenjs/tween.js';
 import Stats from 'stats.js';
 import hasWebgl from 'has-webgl';
@@ -60,12 +58,6 @@ class Game {
         cam.add(this.cam, "followPlayer").name('Follow player');
         cam.open();
 
-        // let controls = this.gui.addFolder("Controls");
-        // controls.add(this.controls, "enablePan").name('Enable pan');
-        // controls.add(this.controls, "enableRotate").name('Enable rotate');
-        // controls.add(this.controls, "enableZoom").name('Enable zoom');
-        // controls.open();
-
         const GUIContainer = document.getElementById('gui');
         GUIContainer.appendChild(this.gui.domElement);
         // this.gui.close();
@@ -81,35 +73,25 @@ class Game {
         let p = Player(this)
         this.player = p.player;
         this.playerGroup = p.playerGroup;
-        this.playerGroup.add(this.cam);
+        this.playerGroup.add(this.cam);     // la camera segue il playerGroup...
         this.cam.target = this.playerGroup.position;
 
         createWorld(this);
 
-        // CONTROLS
-        // this.controls = new OrbitControls(this.cam, this.renderer.domElement);
-        // this.controls.autoRotate = false;
-        // this.controls.enablePan = false;
-        // this.controls.enableRotate = false;
-        // this.controls.enableZoom = false;
-        // this.controls.target = this.playerGroup.position
-        // this.controls.update();
-
         // remember these initial values on RESIZE
-        // this.tanFOV = Math.tan(((Math.PI / 180) * this.cam.fov / 2));
+        this.tanFOV = Math.tan(((Math.PI / 180) * this.cam.fov / 2));
         window.addEventListener('resize', this.onWindowResize.bind(this), false);
         window.addEventListener("mousemove", this.onMouseMove.bind(this), false);
 
         this.addDatGUI();
 
-        // start gameLoop
-        this.gameLoop();
+        this.gameLoop();    // GAME LOOP!!!!
     }
 
     onWindowResize(event) {
         this.cam.aspect = this.container.clientWidth / this.container.clientHeight;
         // adjust the FOV
-        //this.cam.fov = (360 / Math.PI) * Math.atan(this.tanFOV * (this.container.clientHeight / this.container.clientWidth));
+        this.cam.fov = (360 / Math.PI) * Math.atan(this.tanFOV * (this.container.clientHeight / this.container.clientWidth));
         this.cam.updateProjectionMatrix();
         this.renderer.setSize(this.container.clientWidth, this.container.clientHeight);
     }
@@ -181,3 +163,12 @@ window.onload = () => {
         console.log('The browser do not support WEBGL!');
     }
 }
+
+
+
+/*
+
+TODO:
+https://discourse.threejs.org/t/finding-position-of-an-object-relative-to-a-parent/2068
+
+*/

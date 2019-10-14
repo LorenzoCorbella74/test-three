@@ -59,7 +59,6 @@ export default function Player(game) {
         if (game.keyboard.pressed("P")) {
             game.pause = !game.pause;
         }
-
     }
 
     return { playerGroup, player };

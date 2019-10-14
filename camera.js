@@ -1,32 +1,11 @@
 import { config } from './config';
 
-import { Object3D, Vector3, Matrix4, Quaternion, Euler } from 'three';
+import { Vector3, Quaternion, Euler } from 'three';
 
 import TWEEN from '@tweenjs/tween.js';
 
 import { PerspectiveCamera } from 'three';
 
-Object3D.prototype.lookAtObject3D = function () {
-
-    var m1 = new Matrix4();
-    var position = new Vector3();
-    var parentMatrix;
-
-    return function lookAtObject3D(object) {
-        object.updateWorldMatrix(true, false);
-        if (this.parent) {
-            this.parent.updateWorldMatrix(true, false);
-            parentMatrix = this.parent.matrixWorld;
-        } else {
-            parentMatrix = m1.identity();
-        }
-        m1
-            .getInverse(parentMatrix)
-            .multiply(object.matrixWorld);
-        position.setFromMatrixPosition(m1);
-        this.lookAt(position);
-    };
-}();
 
 // https://stackoverflow.com/questions/28091876/tween-camera-position-while-rotation-with-slerp-three-js
 function moveAndLookAt(camera, dstpos, angles, options) {
