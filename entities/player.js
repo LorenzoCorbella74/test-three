@@ -2,17 +2,15 @@ import {
     Mesh,
     AxesHelper,
     MeshBasicMaterial,
-    BoxBufferGeometry,
     CylinderGeometry,
-    Vector3,
+    Vector3, Box3,
     Group,
     BoxHelper
 } from 'three';
-import Camera from '../camera';
+
 
 export default function Player(game) {
 
-    // let geometry = new BoxBufferGeometry(1, 1, 1);
     let geometry = new CylinderGeometry(0.5, 0.5, 1, 10);
     let material = new MeshBasicMaterial({ color: "hsla(212, 100%, 50%, 1)" /* , wireframe: true  */ });
     let playerGroup = new Group();
@@ -32,33 +30,54 @@ export default function Player(game) {
     let axesHelper = new AxesHelper(1);
 
     playerGroup.add(player);
-    // playerGroup.add(game.cam); //camera is following player
     player.add(axesHelper);
     game.scene.add(playerGroup);
 
-    player.velocity = new Vector3();    // TODO: sommare alla posizione la velocità
+    player.velocity = new Vector3();    // TODO: si mette nell'UserData ???
 
     player.update = (game) => {
 
-        let moveDistance = SPEED * game.delta; 			        // 2 units per second (è funzione della dimensione dell'oggetto che si muove)
+        let moveDistance = SPEED * game.delta; 			    // 2 units per second (è funzione della dimensione dell'oggetto che si muove)
         let rotateAngle = Math.PI / 2 * game.delta;	        // pi/2 radians (90 degrees) per second
 
         if (game.keyboard.pressed("W")) {
-            playerGroup.translateZ(-moveDistance);
+            let v = new Vector3(0, 0, -moveDistance);
+            playerGroup.position.add(v);
+            if (player.checkForCollision(playerGroup)) {
+                playerGroup.position.sub(v);
+            }
         }
         if (game.keyboard.pressed("S")) {
-            playerGroup.translateZ(moveDistance);
+            let v = new Vector3(0, 0, moveDistance);
+            playerGroup.position.add(v);
+            if (player.checkForCollision(playerGroup)) {
+                playerGroup.position.sub(v);
+            }
         }
-        // move left/right (strafe)
         if (game.keyboard.pressed("A")) {
-            playerGroup.translateX(-moveDistance);
+            let v = new Vector3(-moveDistance, 0, 0);
+            playerGroup.position.add(v);
+            if (player.checkForCollision(playerGroup)) {
+                playerGroup.position.sub(v);
+            }
         }
         if (game.keyboard.pressed("D")) {
-            playerGroup.translateX(moveDistance);
+            let v = new Vector3(moveDistance, 0, 0);
+            playerGroup.position.add(v);
+            if (player.checkForCollision(playerGroup)) {
+                playerGroup.position.sub(v);
+            }
         }
         if (game.keyboard.pressed("P")) {
             game.pause = !game.pause;
         }
+    }
+
+    player.checkForCollision = (box) => {
+        let futureActorPosition = new Box3().setFromObject(box);
+        let collisionTest = new Box3().setFromObject(game.scene.getObjectByName('wall'));
+        let collision = futureActorPosition.intersectsBox(collisionTest);
+        return collision;
     }
 
     return { playerGroup, player };

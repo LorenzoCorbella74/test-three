@@ -1,9 +1,11 @@
 import {
     MeshBasicMaterial,
     Mesh,
+    BoxBufferGeometry,
     GridHelper,
     PlaneGeometry, DoubleSide
 } from 'three';
+
 
 
 export default function createWorld(game) {
@@ -19,4 +21,11 @@ export default function createWorld(game) {
     let plane = new Mesh(geometry, material);
     plane.rotation.x = Math.PI / 2;  // .rotation.set(new THREE.Vector3( 0, 0, Math.PI / 2));
     game.scene.add(plane);
+
+    let collisionGeometry = new BoxBufferGeometry(10, 5, 1);
+    let collisionMaterial = new MeshBasicMaterial({ color: "hsla(25, 100%, 50%, 1)" /* , wireframe: true  */ });
+    let collisionTest = new Mesh(collisionGeometry, collisionMaterial);
+    collisionTest.position.set(0, 0, -5)
+    collisionTest.name = 'wall';
+    game.scene.add(collisionTest);
 }
