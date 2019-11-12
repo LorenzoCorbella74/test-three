@@ -30,7 +30,7 @@ class Game {
         this.cam = {};
         this.scene = null;
         this.renderer = null;
-        //this.controls = null;
+        
         this.pause = false;
         this.clock = new Clock();
 
@@ -122,9 +122,8 @@ class Game {
         this.mouseIntersectPoint = this.mouseRaycaster.intersectObjects(this.scene.children); // find the point of intersection
         if (this.mouseIntersectPoint.length > 0) {
             var target = this.mouseIntersectPoint[0];
-            // console.log(target.point);
+            // https://stackoverflow.com/questions/15098479/how-to-get-the-global-world-position-of-a-child-object
             var vector = new Vector3();
-            // vector = Object3D.getWorldPosition(this.player);
             vector.setFromMatrixPosition(this.player.matrixWorld);
             target.point = target.point.sub(vector);
             this.player.rotation.y = calcAngleBetweenTwoPoints(this.player.position, target.point);
@@ -135,7 +134,7 @@ class Game {
         this.delta = this.clock.getDelta();              // siamo nell'ordine di 0.017480000000432483 secondi
         this.dallInizio = this.clock.getElapsedTime()    // ms da quando siamo partiti (è un progressivo)
 
-        this.player.update(this);
+        this.player.update(this);                       // si passa il game intero !
     }
 
     gameLoop() {
@@ -144,7 +143,7 @@ class Game {
 
         if (!this.pause) {
             this.keyboard.update();
-            // this.controls.update();
+           
             this.cam.update();
             this.update()
             TWEEN.update();

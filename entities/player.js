@@ -23,12 +23,12 @@ export default function Player(game) {
 
     // set before positioning, rotating, scaling
     var playerBBox = new BoxHelper()
-    playerBBox.setFromObject(player);
+    playerBBox.setFromObject(playerGroup);
 
 
     player.position.y = 0.5 // put on the plane
-    // let axesHelper = new AxesHelper(1);
     playerGroup.add(player);
+    // let axesHelper = new AxesHelper(1);
     // player.add(axesHelper);
     game.scene.add(playerGroup);
     game.scene.add(playerBBox);
@@ -42,33 +42,33 @@ export default function Player(game) {
 
         if (game.keyboard.pressed("W")) {
             let v = new Vector3(0, 0, -moveDistance);
-            player.position.add(v);
+            playerGroup.position.add(v);
             if (player.checkForCollision(playerBBox)) {
-                player.position.sub(v);
+                playerGroup.position.sub(v);
                 playerBBox.update();
             }
         }
         if (game.keyboard.pressed("S")) {
             let v = new Vector3(0, 0, moveDistance);
-            player.position.add(v);
+            playerGroup.position.add(v);
             if (player.checkForCollision(playerBBox)) {
-                player.position.sub(v);
+                playerGroup.position.sub(v);
                 playerBBox.update();
             }
         }
         if (game.keyboard.pressed("A")) {
             let v = new Vector3(-moveDistance, 0, 0);
-            player.position.add(v);
+            playerGroup.position.add(v);
             if (player.checkForCollision(playerBBox)) {
-                player.position.sub(v);
+                playerGroup.position.sub(v);
                 playerBBox.update();
             }
         }
         if (game.keyboard.pressed("D")) {
             let v = new Vector3(moveDistance, 0, 0);
-            player.position.add(v);
+            playerGroup.position.add(v);
             if (player.checkForCollision(playerBBox)) {
-                player.position.sub(v);
+                playerGroup.position.sub(v);
                 playerBBox.update();
             }
         }
