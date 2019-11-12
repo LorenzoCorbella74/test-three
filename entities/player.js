@@ -22,16 +22,16 @@ export default function Player(game) {
 
 
     // set before positioning, rotating, scaling
-    var helper = new BoxHelper()
-    helper.setFromObject(player);
-    player.add(helper);
+    var playerBBox = new BoxHelper()
+    playerBBox.setFromObject(player);
+
 
     player.position.y = 0.5 // put on the plane
-    let axesHelper = new AxesHelper(1);
-
+    // let axesHelper = new AxesHelper(1);
     playerGroup.add(player);
-    player.add(axesHelper);
+    // player.add(axesHelper);
     game.scene.add(playerGroup);
+    game.scene.add(playerBBox);
 
     player.velocity = new Vector3();    // TODO: si mette nell'UserData ???
 
@@ -42,30 +42,34 @@ export default function Player(game) {
 
         if (game.keyboard.pressed("W")) {
             let v = new Vector3(0, 0, -moveDistance);
-            playerGroup.position.add(v);
-            if (player.checkForCollision(playerGroup)) {
-                playerGroup.position.sub(v);
+            player.position.add(v);
+            if (player.checkForCollision(playerBBox)) {
+                player.position.sub(v);
+                playerBBox.update();
             }
         }
         if (game.keyboard.pressed("S")) {
             let v = new Vector3(0, 0, moveDistance);
-            playerGroup.position.add(v);
-            if (player.checkForCollision(playerGroup)) {
-                playerGroup.position.sub(v);
+            player.position.add(v);
+            if (player.checkForCollision(playerBBox)) {
+                player.position.sub(v);
+                playerBBox.update();
             }
         }
         if (game.keyboard.pressed("A")) {
             let v = new Vector3(-moveDistance, 0, 0);
-            playerGroup.position.add(v);
-            if (player.checkForCollision(playerGroup)) {
-                playerGroup.position.sub(v);
+            player.position.add(v);
+            if (player.checkForCollision(playerBBox)) {
+                player.position.sub(v);
+                playerBBox.update();
             }
         }
         if (game.keyboard.pressed("D")) {
             let v = new Vector3(moveDistance, 0, 0);
-            playerGroup.position.add(v);
-            if (player.checkForCollision(playerGroup)) {
-                playerGroup.position.sub(v);
+            player.position.add(v);
+            if (player.checkForCollision(playerBBox)) {
+                player.position.sub(v);
+                playerBBox.update();
             }
         }
         if (game.keyboard.pressed("P")) {
@@ -74,8 +78,9 @@ export default function Player(game) {
     }
 
     player.checkForCollision = (box) => {
-        let futureActorPosition = new Box3().setFromObject(box);
-        let collisionTest = new Box3().setFromObject(game.scene.getObjectByName('wall'));
+        box.update();
+        let futureActorPosition = new Box3(new Vector3(), new Vector3()).setFromObject(box);
+        let collisionTest = new Box3(new Vector3(), new Vector3()).setFromObject(game.scene.getObjectByName('wall'));
         let collision = futureActorPosition.intersectsBox(collisionTest);
         return collision;
     }
