@@ -1,7 +1,7 @@
 import {
     Mesh,
     AxesHelper,
-    MeshBasicMaterial,
+    MeshBasicMaterial, MeshLambertMaterial, MeshPhongMaterial, 
     CylinderGeometry,
     Vector3, Box3,
     Group,
@@ -16,6 +16,8 @@ export default function Player(game) {
     let playerGroup = new Group();
     let player = new Mesh(geometry, material);
     player.name = 'player';
+    player.castShadow = true;
+    player.receiveShadow = true;
 
     // TODO: userData = {...}
     let SPEED = 4;

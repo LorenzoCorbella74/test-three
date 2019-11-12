@@ -109,7 +109,7 @@ class Game {
     initScene() {
         this.scene = new Scene();
         this.scene.background = new Color("#1B2631");
-        let axesHelper = new AxesHelper(3);
+        let axesHelper = new AxesHelper(5);
         this.scene.add(axesHelper);
     }
 
