@@ -22,6 +22,7 @@ import { calcAngleBetweenTwoPoints } from './utils/utils';
 
 import Camera from './camera';
 import Player from './entities/player';
+import Enemy from './entities/enemy';
 import createWorld from './entities/world';
 
 class Game {
@@ -70,11 +71,14 @@ class Game {
 
         this.cam = Camera(this);
 
-        let p = Player(this)
+        let p = Player(this);
         this.player = p.player;
         this.playerGroup = p.playerGroup;
         this.playerGroup.add(this.cam);     // la camera segue il playerGroup...
         this.cam.target = this.playerGroup.position;
+        
+        let e = Enemy(this);
+        this.enemy = e.enemy;
 
         createWorld(this);
 
@@ -125,7 +129,7 @@ class Game {
             // https://stackoverflow.com/questions/15098479/how-to-get-the-global-world-position-of-a-child-object
             var vector = new Vector3();
             vector.setFromMatrixPosition(this.player.matrixWorld);
-            target.point = target.point.sub(vector);
+            target.point = target.point.sub(vector); // è come se mettessi il target.point nel sistema di coordinate del 
             this.player.rotation.y = calcAngleBetweenTwoPoints(this.player.position, target.point);
         }
     }
@@ -135,6 +139,7 @@ class Game {
         this.dallInizio = this.clock.getElapsedTime()    // ms da quando siamo partiti (è un progressivo)
 
         this.player.update(this);                       // si passa il game intero !
+        this.enemy.update(this);
     }
 
     gameLoop() {

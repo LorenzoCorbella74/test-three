@@ -30,8 +30,8 @@ export default function Player(game) {
 
     player.position.y = 0.5 // put on the plane
     playerGroup.add(player);
-    // let axesHelper = new AxesHelper(1);
-    // player.add(axesHelper);
+     let axesHelper = new AxesHelper(1);
+     player.add(axesHelper);
     game.scene.add(playerGroup);
     game.scene.add(playerBBox);
 
