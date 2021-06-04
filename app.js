@@ -115,6 +115,8 @@ class Game {
         this.scene.background = new Color("#1B2631");
         let axesHelper = new AxesHelper(5);
         this.scene.add(axesHelper);
+
+        
     }
 
     onMouseMove() {

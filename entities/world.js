@@ -10,28 +10,29 @@ import {
 export default function createWorld (game) {
 
     // griglia
-    // let gridHelper = new GridHelper(24, 24, 0x444444, 0x555555);
-    // gridHelper.position.y = 0.05;
-    // gridHelper.position.x = 0;
-    // gridHelper.position.z = 0;
-    // game.scene.add(gridHelper);
+    let gridHelper = new GridHelper(24, 24, 0x444444, 0x555555);
+    gridHelper.position.y = 0.05;
+    gridHelper.position.x = 0;
+    gridHelper.position.z = 0;
+    game.scene.add(gridHelper);
 
     //lava texture from http://opengameart.org/sites/default/files/fire.jpg
     let loader = new TextureLoader();
     loader.crossOrigin = "";
-    const textureF = loader.load('http://scmapdb.wdfiles.com/local--files/wad:developer-textures/dev_128_gr_128x.jpg', textureF => {    // 'assets/img/dev_128_gr_064x.png'
-        textureF.wrapS = textureF.wrapT = RepeatWrapping;
-        textureF.offset.set(0, 0);
-        textureF.repeat.set(12, 12);
-        textureF.encoding = sRGBEncoding;
-        // texture.minFilter = NearestFilter;
-    });
+    // const textureF = loader.load('http://scmapdb.wdfiles.com/local--files/wad:developer-textures/dev_128_gr_128x.jpg', textureF => {    // 'assets/img/dev_128_gr_064x.png'
+    // const textureF = loader.load('assets/img/dev_128_gr_064x.png', textureF => {    // 'assets/img/dev_128_gr_064x.png'
+    //     textureF.wrapS = textureF.wrapT = RepeatWrapping;
+    //     textureF.offset.set(0, 0);
+    //     textureF.repeat.set(12, 12);
+    //     textureF.encoding = sRGBEncoding;
+    //     // texture.minFilter = NearestFilter;
+    // });
 
     // FLOOR
     let plane = new Mesh(new PlaneGeometry(24, 24, 1),
         new MeshBasicMaterial({
-            // color: 0x1B2831,
-            map: textureF,
+            color: 0x1B2831,
+            // map: textureF,
             side: DoubleSide
         })
     );
@@ -60,21 +61,21 @@ export default function createWorld (game) {
     game.scene.add(collisionTest);
 
     // LUCI
-    //  subtle ambient lighting
-    // let ambiColor = "#1c1c1c";
-    // let ambientLight = new AmbientLight(ambiColor);
-    // game.scene.add(ambientLight);
-    // 
-    // let pointColor = "#ede8e6";
-    // let directionalLight = new DirectionalLight(pointColor);
-    // directionalLight.position.set(-5, 5, 5);
-    // directionalLight.castShadow = true;
-    // directionalLight.target.position.set(0, 0, -10);
-    // 
-    // directionalLight.intensity = 1.5;
-    // directionalLight.shadow.mapSize.width = 1024;
-    // directionalLight.shadow.mapSize.height = 1024;
-    // game.scene.add(directionalLight);
-    // game.scene.add(directionalLight.target);
+    // subtle ambient lighting
+    let ambiColor = "#1c1c1c";
+    let ambientLight = new AmbientLight(ambiColor);
+    game.scene.add(ambientLight);
+    
+    let pointColor = "#ede8e6";
+    let directionalLight = new DirectionalLight(pointColor);
+    directionalLight.position.set(-5, 5, 5);
+    directionalLight.castShadow = true;
+    directionalLight.target.position.set(0, 0, -10);
+    
+    directionalLight.intensity = 1.5;
+    directionalLight.shadow.mapSize.width = 1024;
+    directionalLight.shadow.mapSize.height = 1024;
+    game.scene.add(directionalLight);
+    game.scene.add(directionalLight.target);
 
 }
